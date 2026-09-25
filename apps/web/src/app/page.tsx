@@ -1,126 +1,259 @@
-import { Suspense } from "react";
+import { Fragment } from "react";
 import Link from "next/link";
-import { CategoryFilter } from "@/components/category-filter";
-import { FeedList } from "@/components/feed-list";
-import { PaperCardSkeleton } from "@/components/paper-card";
-import {
-  Column,
-  ErrorNote,
-  PageShell,
-  Rail,
-  RailBlock,
-  RailHeading,
-  RailNote,
-} from "@/components/page-shell";
+import { OffprintLink } from "@/components/offprint/offprint-link";
+import { OffprintMotion } from "@/components/offprint/offprint-motion";
+import { Plate } from "@/components/offprint/plate";
+import { api, type PaperCard, type PaperDetail } from "@/lib/api";
 import { categoryLabel } from "@/lib/format";
-import { api } from "@/lib/api";
+import { rethrowDuringRevalidation } from "@/lib/isr";
+import {
+  buildOffprints,
+  countWord,
+  issueDate,
+  issueNumber,
+  OFFPRINTS_PER_ISSUE,
+  pad2,
+  titleSize,
+  type Offprint,
+} from "@/lib/offprint";
 
-export const revalidate = 300; // ISR: revalida a cada 5 min
+export const revalidate = 300; // ISR: a edição se refaz a cada 5 min
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string; decoded?: string }>;
-}) {
-  const params = await searchParams;
-  const category = params.category;
-  const decodedOnly = params.decoded === "1";
+const CATEGORIES = ["cs.CL", "cs.LG", "cs.CV", "cs.AI"] as const;
 
-  let initialData;
+type ArchiveRow = { href: string; label: string; count: number };
+
+type Issue = {
+  offprints: Offprint[];
+  archiveTotal: number;
+  archive: ArchiveRow[];
+};
+
+async function loadIssue(): Promise<Issue> {
+  const [decodedFeed, fullFeed, topics] = await Promise.all([
+    api.getFeed({ limit: 20, decodedOnly: true }),
+    api.getFeed({ limit: 20 }),
+    api.getTopics({ sort: "size", limit: 6 }).catch(() => null),
+  ]);
+
+  const picks = dedupe([...decodedFeed.papers, ...fullFeed.papers]).slice(
+    0,
+    OFFPRINTS_PER_ISSUE,
+  );
+  const details = new Map<string, PaperDetail>();
+  const settled = await Promise.allSettled(picks.map((p) => api.getPaper(p.arxiv_id)));
+  settled.forEach((r) => {
+    if (r.status === "fulfilled") details.set(r.value.arxiv_id, r.value);
+  });
+
+  let archive: ArchiveRow[] = (topics?.topics ?? []).map((t) => ({
+    href: `/topic/${t.slug}`,
+    label: t.name,
+    count: t.paper_count,
+  }));
+
+  // Sem tópicos ainda (clustering não rodou): as categorias do arXiv
+  if (archive.length === 0) {
+    const counts = await Promise.allSettled(
+      CATEGORIES.map((c) => api.getFeed({ limit: 1, category: c })),
+    );
+    archive = CATEGORIES.map((c, i) => {
+      const r = counts[i];
+      return {
+        href: `/archive?category=${c}`,
+        label: categoryLabel(c),
+        count: r.status === "fulfilled" ? r.value.total : 0,
+      };
+    }).filter((row) => row.count > 0);
+  }
+
+  return {
+    offprints: buildOffprints(decodedFeed.papers, fullFeed.papers, details),
+    archiveTotal: fullFeed.total,
+    archive,
+  };
+}
+
+function dedupe(papers: PaperCard[]): PaperCard[] {
+  const seen = new Set<string>();
+  return papers.filter((p) => (seen.has(p.arxiv_id) ? false : (seen.add(p.arxiv_id), true)));
+}
+
+/** Uma linha que sobe de dentro da própria máscara. */
+function Line({ delay, children }: { delay: number; children: React.ReactNode }) {
+  return (
+    <span className="op-mask">
+      <span data-reveal="line" data-delay={delay}>
+        {children}
+      </span>
+    </span>
+  );
+}
+
+function OffprintSection({ offprint, index }: { offprint: Offprint; index: number }) {
+  const side = index % 2 === 0 ? "left" : "right";
+  const words = offprint.title.split(/\s+/).filter(Boolean);
+
+  return (
+    <section
+      id={index === 0 ? "today" : undefined}
+      data-count={pad2(index + 1)}
+      data-stack=""
+      className="op-grid op-print"
+    >
+      {side === "left" && <Plate figure={offprint.figure} side="left" />}
+
+      <div className="op-copy" data-side={side === "left" ? "right" : "left"}>
+        <div className="op-label" data-reveal="fade" data-delay="120">
+          {offprint.kicker}
+        </div>
+        {/* Máscara por palavra; OffprintMotion agrupa as palavras pela linha
+            em que caíram e escalona 90ms por linha, como no protótipo */}
+        <h2
+          className="op-title"
+          data-size={titleSize(offprint.title)}
+          data-line-stagger="180,90"
+        >
+          {words.map((word, i) => (
+            <Fragment key={i}>
+              <span className="op-mask op-mask--word">
+                <span data-reveal="line" data-delay="180">
+                  {word}
+                </span>
+              </span>
+              {i < words.length - 1 && " "}
+            </Fragment>
+          ))}
+        </h2>
+        {offprint.dek && (
+          <p className="op-dek" data-reveal="fade" data-delay="380">
+            {offprint.dek}
+          </p>
+        )}
+        <OffprintLink
+          arxivId={offprint.arxivId}
+          position={index}
+          decoded={offprint.decoded}
+        >
+          {offprint.decoded ? "Read the offprint →" : "Read the abstract →"}
+        </OffprintLink>
+      </div>
+
+      {side === "right" && <Plate figure={offprint.figure} side="right" />}
+    </section>
+  );
+}
+
+export default async function Home() {
+  const now = new Date();
+  const date = issueDate(now);
+
+  let issue: Issue | null = null;
   let error: string | null = null;
-
   try {
-    initialData = await api.getFeed({ limit: 20, category, decodedOnly });
+    issue = await loadIssue();
   } catch (e) {
+    rethrowDuringRevalidation(e);
     error = e instanceof Error ? e.message : "Unknown error";
   }
 
-  const countCaption = [
-    decodedOnly ? "decoded papers" : "papers",
-    category ? `in ${categoryLabel(category)}` : "across cs.AI, cs.CL, cs.LG and cs.CV",
-  ].join(" ");
+  const offprints = issue?.offprints ?? [];
+  const minutes = Math.max(
+    1,
+    Math.round(offprints.reduce((a, o) => a + o.minutes, 0)),
+  );
 
   return (
-    <PageShell>
-      <Column>
-        <h1 className="mb-[22px] max-w-[20ch] font-serif text-[clamp(38px,4.8vw,58px)] font-semibold leading-[1.08] tracking-[-0.024em] [text-wrap:pretty]">
-          Every AI paper, <span className="text-accent">explained for humans.</span>
-        </h1>
-
-        <p className="mb-[clamp(38px,4.5vw,56px)] max-w-[58ch] text-[19px] leading-[1.6] text-foreground/80 [text-wrap:pretty]">
-          New research from arXiv, decoded into one sentence, a sixty-second
-          read, figures explained, and analogies that name where they break. No
-          PhD required.
-        </p>
-
-        <Suspense fallback={<div className="mb-2 h-9 border-b border-rule-strong" />}>
-          <CategoryFilter />
-        </Suspense>
-
-        {error ? (
-          <div className="mt-8">
-            <ErrorNote title="API unreachable" message={error} />
-          </div>
-        ) : initialData ? (
-          <Suspense
-            fallback={
+    <OffprintMotion total={offprints.length}>
+      <section id="top" data-count="00" className="op-grid op-hero">
+        <div className="op-hero-body">
+          <h1 className="op-open">
+            <Line delay={0}>One paper,</Line>
+            <Line delay={90}>
+              printed <em>alone</em>.
+            </Line>
+          </h1>
+          <div className="op-meta op-label">
+            <span data-reveal="fade" data-delay="260">
+              {date}
+            </span>
+            {offprints.length > 0 && (
               <>
-                <PaperCardSkeleton />
-                <PaperCardSkeleton />
-                <PaperCardSkeleton />
+                <span data-reveal="fade" data-delay="320">
+                  {countWord(offprints.length)} offprint
+                  {offprints.length === 1 ? "" : "s"}
+                </span>
+                <span data-reveal="fade" data-delay="380">
+                  {minutes} min
+                </span>
               </>
-            }
-          >
-            <FeedList
-              initialData={initialData}
-              category={category}
-              decodedOnly={decodedOnly}
-            />
-          </Suspense>
-        ) : null}
-      </Column>
+            )}
+          </div>
+          {error && (
+            <p className="op-error" role="status">
+              The paper index could not be reached ({error}). This page
+              tries again every five minutes.
+            </p>
+          )}
+        </div>
+        <div className="op-cue op-label" aria-hidden="true">
+          scroll
+        </div>
+      </section>
 
-      {initialData && (
-        <Rail>
-          <RailHeading>The index</RailHeading>
+      {offprints.map((o, i) => (
+        <OffprintSection key={o.arxivId} offprint={o} index={i} />
+      ))}
 
-          <RailBlock>
-            <div className="tnum mb-2 font-serif text-[52px] font-bold leading-[0.9] tracking-[-0.04em]">
-              {initialData.total.toLocaleString("en-US")}
-            </div>
-            <div className="font-mono text-[11.5px] leading-[1.5] tracking-[0.1em] text-muted-foreground">
-              {countCaption}
-            </div>
-          </RailBlock>
-
-          <RailBlock className="flex flex-col gap-2.5 font-mono text-[12px]">
+      {issue && (
+        <section id="archive" data-stack="" className="op-grid op-archive">
+          <div className="op-archive-head">
             <Link
-              href="/pulse"
-              className="text-muted-foreground transition-colors hover:text-accent"
+              href="/archive"
+              className="op-label"
+              data-reveal="fade"
+              data-delay="0"
             >
-              what&apos;s heating up →
+              The archive · {issue.archiveTotal.toLocaleString("en-US")}
             </Link>
-            <Link
-              href="/topics"
-              className="text-muted-foreground transition-colors hover:text-accent"
-            >
-              every topic tracked →
-            </Link>
-            <Link
-              href="/listen"
-              className="text-muted-foreground transition-colors hover:text-accent"
-            >
-              papers as audio →
-            </Link>
-          </RailBlock>
-
-          <RailNote>
-            Papers are ranked by community signal — Hacker News mentions and
-            citation velocity — then decoded in that order. Anything already
-            decoded stays free at a permanent URL.
-          </RailNote>
-        </Rail>
+          </div>
+          <ul className="op-archive-list">
+            {issue.archive.map((row, i) => (
+              <li key={row.href}>
+                <Link
+                  href={row.href}
+                  className="op-row"
+                  data-cur="open"
+                  data-reveal="fade"
+                  data-delay={80 + i * 60}
+                >
+                  <span>{row.label}</span>
+                  <span className="op-row-count">
+                    {row.count.toLocaleString("en-US")}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
-    </PageShell>
+
+      <section id="about" data-count="end" data-stack="" className="op-grid op-about">
+        <div className="op-about-body">
+          <p className="op-lede">
+            <Line delay={0}>Six papers a day,</Line>
+            <Line delay={90}>read all the way</Line>
+            <Line delay={180}>through.</Line>
+          </p>
+          <div
+            className="op-colophon op-label"
+            data-reveal="fade"
+            data-delay="320"
+          >
+            Decoded · issue {issueNumber(now)} · {date}
+          </div>
+        </div>
+      </section>
+    </OffprintMotion>
   );
 }

@@ -30,8 +30,13 @@ export function VocabText({
         const term = seg.term;
         return term ? (
           <Popover key={i}>
+            {/* Um span, não um <button>: o termo quebra linha como texto
+                corrido em vez de saltar inteiro para a linha seguinte */}
             <PopoverTrigger
+              nativeButton={false}
+              render={<span />}
               className="cursor-help border-b border-accent-light transition-colors hover:border-accent hover:text-accent"
+              data-cur="define"
               onClick={() => capture(EVENTS.VOCAB_TERM_OPENED, { term: term.term })}
             >
               {seg.text}
@@ -39,12 +44,12 @@ export function VocabText({
             <PopoverContent
               side="top"
               align="start"
-              className="w-72 border border-border bg-background p-4 shadow-none ring-0"
+              className="w-[calc(320*var(--px))] min-w-64 border border-border bg-background p-[calc(20*var(--px))] shadow-none ring-0"
             >
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">
+              <p className="op-label m-0 text-accent">
                 {term.term}
               </p>
-              <p className="mt-2 text-[14.5px] leading-[1.55] text-foreground">
+              <p className="mb-0 mt-[calc(10*var(--px))] font-serif text-[length:calc(17*var(--px))] font-light leading-[1.55] text-foreground">
                 {term.definition}
               </p>
             </PopoverContent>

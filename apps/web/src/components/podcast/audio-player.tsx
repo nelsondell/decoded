@@ -141,7 +141,7 @@ export function AudioPlayer({
   const progress = duration > 0 ? (current / duration) * 100 : 0;
 
   return (
-    <div className="bg-surface">
+    <div>
       <audio
         ref={audioRef}
         src={src}
@@ -160,58 +160,46 @@ export function AudioPlayer({
         onPause={() => setPlaying(false)}
       />
 
-      {/* Controles */}
-      <div className="flex items-center gap-4 px-5 py-4">
+      {/* Controles: o botão redondo ecoa o anel do cursor */}
+      <div className="flex flex-wrap items-center gap-x-[calc(22*var(--px))] gap-y-3">
         <button
           type="button"
           onClick={toggle}
           disabled={!ready}
           aria-label={playing ? "Pause" : "Play"}
-          className="flex h-11 w-11 shrink-0 items-center justify-center border border-accent text-accent transition-colors hover:bg-accent hover:text-accent-foreground disabled:opacity-40"
+          className="op-play"
         >
           {playing ? (
-            <svg width="14" height="16" viewBox="0 0 14 16" fill="currentColor">
+            <svg width="12" height="14" viewBox="0 0 14 16" fill="currentColor" aria-hidden="true">
               <rect x="0" y="0" width="4.5" height="16" />
               <rect x="9.5" y="0" width="4.5" height="16" />
             </svg>
           ) : (
-            <svg width="14" height="16" viewBox="0 0 14 16" fill="currentColor">
-              <path d="M0 0 L14 8 L0 16 Z" />
+            <svg width="12" height="14" viewBox="0 0 14 16" fill="currentColor" aria-hidden="true">
+              <path d="M1 0 L14 8 L1 16 Z" />
             </svg>
           )}
         </button>
 
-        <button
-          type="button"
-          onClick={() => skip(-15)}
-          disabled={!ready}
-          className="shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] text-subtle transition-colors hover:text-foreground disabled:opacity-40"
-        >
+        <button type="button" onClick={() => skip(-15)} disabled={!ready} className="op-link">
           −15
         </button>
-
-        <button
-          type="button"
-          onClick={() => skip(30)}
-          disabled={!ready}
-          className="shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] text-subtle transition-colors hover:text-foreground disabled:opacity-40"
-        >
+        <button type="button" onClick={() => skip(30)} disabled={!ready} className="op-link">
           +30
         </button>
 
-        <div className="flex-1" />
-
-        <span className="tnum shrink-0 font-mono text-[12px] text-subtle">
+        <span className="op-label tnum ml-auto">
           {formatTime(current)} / {formatTime(duration)}
         </span>
 
-        <div className="flex shrink-0 gap-1.5">
+        <div className="op-label flex gap-[calc(12*var(--px))]" role="group" aria-label="Playback speed">
           {SPEEDS.map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => changeSpeed(s)}
-              className={`tnum font-mono text-[11px] transition-colors ${
+              aria-pressed={speed === s}
+              className={`tnum border-0 bg-transparent p-0 font-[inherit] tracking-[inherit] transition-colors ${
                 speed === s ? "text-accent" : "text-subtle hover:text-foreground"
               }`}
             >
@@ -221,9 +209,20 @@ export function AudioPlayer({
         </div>
       </div>
 
-      {/* Barra de progresso */}
+      {/* Trilho de progresso: um fio, marcas de capítulo em ink-3 */}
       <div
-        className="group relative h-2 cursor-pointer bg-border"
+        className="op-track mt-[calc(22*var(--px))]"
+        role="slider"
+        tabIndex={0}
+        aria-label="Seek"
+        aria-valuemin={0}
+        aria-valuemax={Math.round(duration)}
+        aria-valuenow={Math.round(current)}
+        aria-valuetext={`${formatTime(current)} of ${formatTime(duration)}`}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowRight") skip(5);
+          if (e.key === "ArrowLeft") skip(-5);
+        }}
         onClick={(e) => {
           if (duration <= 0) return;
           const rect = e.currentTarget.getBoundingClientRect();
@@ -231,17 +230,12 @@ export function AudioPlayer({
           seekTo(ratio * duration);
         }}
       >
-        <div
-          className="absolute inset-y-0 left-0 bg-accent"
-          style={{ width: `${progress}%` }}
-        />
-
-        {/* Marcadores de capítulo */}
+        <div className="op-track-fill" style={{ width: `${progress}%` }} />
         {duration > 0 &&
           chapters.map((c) => (
             <div
               key={c.title}
-              className="absolute inset-y-0 w-px bg-background"
+              className="op-track-tick"
               style={{ left: `${(c.start_seconds / duration) * 100}%` }}
             />
           ))}
@@ -249,7 +243,7 @@ export function AudioPlayer({
 
       {/* Capítulos */}
       {chapters.length > 0 && (
-        <ol className="border-t border-border">
+        <ol className="m-0 mt-[calc(18*var(--px))] list-none border-b border-border p-0">
           {chapters.map((c, i) => (
             <li key={c.title}>
               <button
@@ -258,20 +252,11 @@ export function AudioPlayer({
                   seekTo(c.start_seconds);
                   if (!playing) void play();
                 }}
-                className={`flex w-full items-baseline gap-3.5 px-5 py-3 text-left transition-colors hover:bg-tint ${
-                  activeChapter === i ? "bg-tint" : ""
-                }`}
+                aria-current={activeChapter === i ? "true" : undefined}
+                className="op-chapter"
               >
-                <span className="tnum shrink-0 font-mono text-[11px] text-subtle">
-                  {formatTime(c.start_seconds)}
-                </span>
-                <span
-                  className={`text-[16px] ${
-                    activeChapter === i ? "text-accent" : ""
-                  }`}
-                >
-                  {c.title}
-                </span>
+                <span className="op-label tnum flex-none">{formatTime(c.start_seconds)}</span>
+                <span>{c.title}</span>
               </button>
             </li>
           ))}

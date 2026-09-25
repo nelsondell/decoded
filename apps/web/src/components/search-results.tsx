@@ -1,8 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import type { SearchHit } from "@/lib/api";
-import { relativeTime } from "@/lib/format";
+import { EmptyNote, SectionHead } from "@/components/page-shell";
+import { RelativeTime } from "@/components/relative-time";
 import { EVENTS, capture } from "@/lib/analytics";
 
+/*
+  Componente de cliente: registra o clique no resultado. Renderizado a
+  partir de um server component, precisa da diretiva para poder passar
+  onClick ao Link.
+*/
 export function SearchResults({
   hits,
   reranked,
@@ -16,40 +24,29 @@ export function SearchResults({
 }) {
   if (hits.length === 0) {
     return (
-      <div className="mt-10 border-y border-border py-12">
-        <p className="mb-3.5 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-          No results
-        </p>
-        <p className="max-w-[46ch] font-serif text-[21px] leading-[1.45] [text-wrap:pretty]">
+      <div className="mt-[calc(56*var(--px))]">
+        <EmptyNote label="No results">
           Nothing in the decoded archive matched that. Search runs over the
-          explanations, not the raw PDFs — a paper still in the queue will not
-          show up here.
-        </p>
+          explanations, not the raw PDFs.
+        </EmptyNote>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="mb-2 mt-10 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-rule-strong pb-3">
-        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-          {hits.length} of {totalFound} candidates
-        </span>
-        <span className="tnum font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
-          {reranked ? "Ranked by passage match" : "Ranked by similarity"} ·{" "}
-          {latencyMs}ms
-        </span>
-      </div>
+    <div className="mt-[calc(72*var(--px))]">
+      <SectionHead
+        label={`${hits.length} of ${totalFound} candidates`}
+        aside={`${reranked ? "ranked by passage match" : "ranked by similarity"} · ${latencyMs}ms`}
+      />
 
-      <div>
+      <ul className="op-entries">
         {hits.map((hit, i) => (
-          <article
-            key={hit.arxiv_id}
-            className="row-shift group border-b border-border last:border-b-0"
-          >
+          <li key={hit.arxiv_id} data-reveal="fade" data-delay="auto">
             <Link
               href={`/paper/${hit.arxiv_id}`}
-              className="block py-6"
+              className="op-entry"
+              data-cur="read"
               onClick={() =>
                 capture(EVENTS.SEARCH_RESULT_CLICKED, {
                   arxiv_id: hit.arxiv_id,
@@ -59,45 +56,35 @@ export function SearchResults({
                 })
               }
             >
-              <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[11.5px] tracking-[0.1em] text-subtle">
-                <span>{hit.arxiv_id}</span>
-                <span aria-hidden="true">·</span>
-                <span className="tnum">{relativeTime(hit.published_at)}</span>
-                {hit.section && (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <span>{hit.section}</span>
-                  </>
-                )}
-                <span className="tnum ml-auto">
-                  match {hit.score.toFixed(2)}
+              <span className="op-entry-body">
+                <span className="op-kicker op-label">
+                  <span>arXiv:{hit.arxiv_id}</span>
+                  <RelativeTime iso={hit.published_at} className="tnum" />
+                  {hit.section && <span>{hit.section}</span>}
+                  <span className="tnum ml-auto">match {hit.score.toFixed(2)}</span>
                 </span>
-              </div>
 
-              <h2 className="mb-2.5 max-w-[44ch] font-serif text-[21px] font-semibold leading-[1.3] tracking-[-0.012em] transition-colors [text-wrap:pretty] group-hover:text-accent">
-                {hit.title}
-              </h2>
+                <span className="op-entry-title block">{hit.title}</span>
 
-              {hit.one_sentence && (
-                <p className="max-w-[56ch] text-[16.5px] leading-[1.55] text-muted-foreground [text-wrap:pretty]">
-                  {hit.one_sentence}
-                </p>
-              )}
+                {hit.one_sentence && (
+                  <span className="op-entry-dek block">{hit.one_sentence}</span>
+                )}
 
-              {hit.snippet && (
-                <p className="mt-3 max-w-[56ch] text-[16px] leading-[1.55] text-muted-foreground [text-wrap:pretty]">
-                  Matched on{" "}
-                  <span className="bg-accent-soft text-foreground">
-                    {hit.snippet.length > 240
-                      ? `${hit.snippet.slice(0, 240)}…`
-                      : hit.snippet}
+                {hit.snippet && (
+                  <span className="op-entry-dek block">
+                    <span className="op-label mr-2">Matched on</span>
+                    <mark className="op-mark">
+                      {hit.snippet.length > 240
+                        ? `${hit.snippet.slice(0, 240)}…`
+                        : hit.snippet}
+                    </mark>
                   </span>
-                </p>
-              )}
+                )}
+              </span>
             </Link>
-          </article>
+          </li>
         ))}
-      </div>
-    </>
+      </ul>
+    </div>
   );
 }

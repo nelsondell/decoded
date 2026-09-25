@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { TopicCard } from "@/components/topics/topic-card";
+import { TopicCard, TopicList } from "@/components/topics/topic-card";
 import {
   Column,
-  PageLead,
+  Masthead,
   PageShell,
-  PageTitle,
   Rail,
   RailHeading,
   RailNote,
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
 const SORTS = [
   { key: "size", label: "Size" },
   { key: "momentum", label: "Momentum" },
-  { key: "name", label: "A-Z" },
+  { key: "name", label: "A–Z" },
 ] as const;
 
 export default async function TopicsPage({
@@ -36,42 +35,35 @@ export default async function TopicsPage({
 
   return (
     <PageShell>
+      <Masthead
+        kicker={<span>The index · {data.total}</span>}
+        title="Topics"
+        lead="Discovered by clustering paper embeddings rather than assigned by hand, so the names read like the papers, not like a catalogue."
+      />
+
       <Column>
-        <PageTitle className="mb-[22px]">Topics</PageTitle>
-        <PageLead className="mb-[clamp(32px,4vw,44px)]">
-          {data.total} topics, discovered by clustering paper embeddings rather
-          than assigned by hand.
-        </PageLead>
-
-        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-7 gap-y-4 border-b border-rule-strong pb-3">
-          <div className="flex flex-wrap gap-x-[22px] gap-y-2">
-            {SORTS.map((s) => (
-              <Link
-                key={s.key}
-                href={`/topics?sort=${s.key}`}
-                className={`font-mono text-[12px] uppercase tracking-[0.14em] transition-colors ${
-                  sort === s.key
-                    ? "text-foreground"
-                    : "text-subtle hover:text-foreground"
-                }`}
-              >
-                {s.label}
-              </Link>
-            ))}
-          </div>
-
-          <Link
-            href="/pulse"
-            className="font-mono text-[12px] uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-70"
-          >
+        <nav className="op-tabs" aria-label="Sort topics">
+          {SORTS.map((s) => (
+            <Link
+              key={s.key}
+              href={`/topics?sort=${s.key}`}
+              className="op-nav-link"
+              aria-current={sort === s.key ? "page" : undefined}
+            >
+              {s.label}
+            </Link>
+          ))}
+          <Link href="/pulse" className="op-nav-link op-tabs-aside">
             Field Pulse →
           </Link>
-        </div>
+        </nav>
 
-        <div>
-          {(data.topics ?? []).map((t) => (
-            <TopicCard key={t.slug} topic={t} />
-          ))}
+        <div className="mt-[calc(40*var(--px))]">
+          <TopicList>
+            {(data.topics ?? []).map((t) => (
+              <TopicCard key={t.slug} topic={t} />
+            ))}
+          </TopicList>
         </div>
       </Column>
 
@@ -79,9 +71,7 @@ export default async function TopicsPage({
         <RailHeading>How topics are found</RailHeading>
         <RailNote>
           Abstracts are embedded and clustered; each cluster is labelled from its
-          own vocabulary. Nothing here comes from a taxonomy someone wrote once,
-          which is why the names read like the papers rather than like a
-          catalogue.
+          own vocabulary. Nothing here comes from a taxonomy someone wrote once.
         </RailNote>
       </Rail>
     </PageShell>

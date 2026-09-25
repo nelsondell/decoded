@@ -39,10 +39,7 @@ export function SaveButton({ arxivId }: { arxivId: string }) {
   if (!isSignedIn) {
     return (
       <SignInButton mode="modal">
-        <button
-          type="button"
-          className="border-b border-accent-light font-mono text-[11.5px] uppercase tracking-[0.14em] text-accent transition-colors hover:border-accent"
-        >
+        <button type="button" className="op-link">
           Save
         </button>
       </SignInButton>
@@ -56,11 +53,11 @@ export function SaveButton({ arxivId }: { arxivId: string }) {
       type="button"
       onClick={() => toggle.mutate()}
       disabled={toggle.isPending}
-      className={`border-b font-mono text-[11.5px] uppercase tracking-[0.14em] text-accent transition-colors disabled:opacity-50 ${
-        saved ? "border-accent" : "border-accent-light hover:border-accent"
-      }`}
+      aria-pressed={saved}
+      className="op-link"
+      data-on={saved ? "" : undefined}
     >
-      {toggle.isPending ? "..." : saved ? "Saved" : "Save"}
+      {toggle.isPending ? "…" : saved ? "Saved ✓" : "Save"}
     </button>
   );
 }

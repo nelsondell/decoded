@@ -12,6 +12,7 @@ interface FollowState {
   following: boolean;
 }
 
+/** Seguir, como ação em linha: mono, fio embaixo; seguindo, fio de tinta. */
 export function FollowButton({
   targetType,
   slug,
@@ -45,11 +46,8 @@ export function FollowButton({
   if (!isSignedIn) {
     return (
       <SignInButton mode="modal">
-        <button
-          type="button"
-          className="border border-border px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-subtle transition-colors hover:border-accent hover:text-accent"
-        >
-          Follow
+        <button type="button" className="op-link">
+          Follow +
         </button>
       </SignInButton>
     );
@@ -60,13 +58,11 @@ export function FollowButton({
       type="button"
       onClick={() => toggle.mutate()}
       disabled={toggle.isPending}
-      className={`border px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors disabled:opacity-50 ${
-        following
-          ? "border-accent bg-accent text-accent-foreground"
-          : "border-border text-subtle hover:border-accent hover:text-accent"
-      }`}
+      aria-pressed={following}
+      className="op-link"
+      data-on={following ? "" : undefined}
     >
-      {toggle.isPending ? "…" : following ? "Following" : "Follow"}
+      {toggle.isPending ? "…" : following ? "Following ✓" : "Follow +"}
     </button>
   );
 }

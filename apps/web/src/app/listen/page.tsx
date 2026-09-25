@@ -3,14 +3,16 @@ import Link from "next/link";
 import { CopyField } from "@/components/copy-field";
 import {
   Column,
-  PageLead,
+  EmptyNote,
+  Masthead,
+  PageSection,
   PageShell,
-  PageTitle,
   Rail,
   RailHeading,
   RailNote,
   WhereItBreaks,
 } from "@/components/page-shell";
+import { issueDate } from "@/lib/offprint";
 
 const API_BASE = process.env.API_INTERNAL_URL ?? "http://localhost:8000";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -47,83 +49,78 @@ async function getEpisodes(): Promise<Episode[]> {
 
 export default async function ListenPage() {
   const episodes = await getEpisodes();
+  const minutes = Math.round(
+    episodes.reduce((a, ep) => a + ep.duration_seconds, 0) / 60,
+  );
 
   return (
     <PageShell>
+      <Masthead
+        kicker={<span>Papers as audio</span>}
+        title="Listen"
+        lead="Every decoded paper as three to eight minutes of audio. Written for the ear — no diagrams, no notation, nothing you need to see."
+        meta={
+          episodes.length > 0 ? (
+            <>
+              <span className="tnum">
+                {episodes.length} episode{episodes.length === 1 ? "" : "s"}
+              </span>
+              <span className="tnum">{minutes} min</span>
+            </>
+          ) : undefined
+        }
+      />
+
       <Column>
-        <PageTitle className="mb-[22px]">Listen</PageTitle>
-        <PageLead className="mb-[clamp(36px,4.5vw,52px)] max-w-[54ch]">
-          Every decoded paper as three to eight minutes of audio. Written for
-          the ear — no diagrams, no notation, nothing you need to see.
-        </PageLead>
-
-        <div className="mb-[clamp(44px,5vw,64px)] bg-surface px-[26px] py-6">
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
-            Subscribe
-          </p>
-          <p className="mb-4 text-[17px] text-muted-foreground">
-            Paste this into Overcast, Pocket Casts, or any podcast app.
-          </p>
-          <CopyField value={`${SITE_URL}/feed.xml`} />
-        </div>
-
-        <div className="border-b border-rule-strong pb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-          Latest episodes
-        </div>
-
-        {episodes.length === 0 ? (
-          <p className="border-b border-border py-12 font-mono text-[11.5px] uppercase tracking-[0.14em] text-subtle">
-            No episodes yet
-          </p>
-        ) : (
-          <div>
-            {episodes.map((ep) => (
-              <div
-                key={ep.arxiv_id}
-                className="row-shift group border-b border-border last:border-b-0"
-              >
-                <Link
-                  href={`/paper/${ep.arxiv_id}#podcast`}
-                  className="flex flex-wrap items-start gap-x-6 gap-y-3.5 py-[26px]"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="mt-1 flex h-[34px] w-[34px] flex-none items-center justify-center border border-accent font-mono text-[11px] text-accent transition-colors group-hover:bg-accent group-hover:text-accent-foreground"
-                  >
-                    ▶
-                  </span>
-
-                  <div className="min-w-0 flex-[1_1_340px]">
-                    <div className="mb-2 flex flex-wrap items-center gap-x-3 font-mono text-[11.5px] tracking-[0.1em] text-subtle">
-                      <span>{ep.arxiv_id}</span>
-                      <span aria-hidden="true">·</span>
-                      <span className="tnum">
-                        {new Date(ep.published_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                    </div>
-
-                    <h2 className="mb-2 max-w-[40ch] font-serif text-[21px] font-semibold leading-[1.3] transition-colors [text-wrap:pretty] group-hover:text-accent">
-                      {ep.title}
-                    </h2>
-
-                    {ep.one_sentence && (
-                      <p className="max-w-[52ch] text-[16.5px] leading-[1.5] text-muted-foreground [text-wrap:pretty]">
-                        {ep.one_sentence}
-                      </p>
-                    )}
-                  </div>
-
-                  <span className="tnum ml-auto flex-none font-mono text-[12px] text-subtle">
-                    {Math.round(ep.duration_seconds / 60)} min
-                  </span>
-                </Link>
-              </div>
-            ))}
+        <PageSection label="Subscribe" aside="any podcast app">
+          <div data-reveal="fade" data-delay="80">
+            <p className="op-prose op-prose-2 mb-[calc(22*var(--px))] mt-0">
+              Paste this into Overcast, Pocket Casts, or anything that reads RSS.
+            </p>
+            <CopyField value={`${SITE_URL}/feed.xml`} />
           </div>
-        )}
+        </PageSection>
+
+        <PageSection label="Latest episodes">
+          {episodes.length === 0 ? (
+            <EmptyNote label="No episodes yet">
+              Episodes appear here as papers are decoded and read aloud.
+            </EmptyNote>
+          ) : (
+            <ul className="op-entries">
+              {episodes.map((ep) => (
+                <li key={ep.arxiv_id} data-reveal="fade" data-delay="auto">
+                  <Link
+                    href={`/paper/${ep.arxiv_id}#podcast`}
+                    className="op-entry"
+                    data-cur="listen"
+                  >
+                    <span className="op-entry-body flex items-start gap-[calc(24*var(--px))]">
+                      <span className="op-play mt-[calc(6*var(--px))]" aria-hidden="true">
+                        <svg width="11" height="13" viewBox="0 0 14 16" fill="currentColor">
+                          <path d="M1 0 L14 8 L1 16 Z" />
+                        </svg>
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="op-kicker op-label">
+                          <span>arXiv:{ep.arxiv_id}</span>
+                          <span className="tnum">{issueDate(new Date(ep.published_at))}</span>
+                          <span className="tnum">
+                            {Math.round(ep.duration_seconds / 60)} min
+                          </span>
+                        </span>
+                        <span className="op-entry-title block">{ep.title}</span>
+                        {ep.one_sentence && (
+                          <span className="op-entry-dek block">{ep.one_sentence}</span>
+                        )}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </PageSection>
       </Column>
 
       <Rail>
@@ -133,7 +130,7 @@ export default async function ListenPage() {
           sentences, figures become descriptions, and section numbers are
           dropped.
         </RailNote>
-        <WhereItBreaks className="mt-[22px]">
+        <WhereItBreaks className="mt-[calc(28*var(--px))]">
           Diagram-heavy papers lose the most. When a figure carries the
           argument, the episode says so and points you back to the page.
         </WhereItBreaks>

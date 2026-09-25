@@ -3,17 +3,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FollowButton } from "@/components/follow-button";
-import { PaperCard } from "@/components/paper-card";
+import { PaperCard, PaperList } from "@/components/paper-card";
 import {
-  BackLink,
   Column,
+  EmptyNote,
+  Masthead,
+  PageSection,
   PageShell,
-  PageTitle,
   Rail,
   RailHeading,
   RailNote,
   Stat,
-  SubSection,
+  Stats,
   WhereItBreaks,
 } from "@/components/page-shell";
 import { ApiError, api } from "@/lib/api";
@@ -57,80 +58,75 @@ export default async function InstitutionPage({
   const papers = inst.papers ?? [];
 
   return (
-    <PageShell tight>
+    <PageShell>
+      <Masthead
+        back={{ href: "/institutions", label: "Institutions" }}
+        kicker={
+          <>
+            <span>Institution</span>
+            {inst.country_code && <span>{inst.country_code}</span>}
+          </>
+        }
+        title={inst.name}
+        aside={
+          <FollowButton
+            targetType="institution"
+            slug={inst.slug}
+            initialFollowing={inst.is_following}
+          />
+        }
+      />
+
       <Column>
-        <BackLink href="/institutions">← Institutions</BackLink>
-
-        <div className="mt-7 flex items-start justify-between gap-6">
-          <PageTitle className="min-w-0 text-[clamp(32px,4.2vw,48px)]">
-            {inst.name}
-          </PageTitle>
-          <div className="shrink-0">
-            <FollowButton
-              targetType="institution"
-              slug={inst.slug}
-              initialFollowing={inst.is_following}
-            />
-          </div>
-        </div>
-
-        <div className="mt-9 grid grid-cols-3 gap-6 border-y border-border py-6">
+        <Stats>
           <Stat label="Papers" value={inst.paper_count} />
           <Stat label="Authors" value={inst.author_count} />
           <Stat label="Citations" value={inst.total_citations} />
-        </div>
+        </Stats>
 
-        <div className="mt-12 space-y-12">
-          {topics.length > 0 && (
-            <SubSection label="Research areas" className="border-t-0 pt-0">
-              <div className="flex flex-wrap gap-x-5 gap-y-2.5">
-                {topics.map((t) => (
-                  <Link
-                    key={t.slug}
-                    href={`/topic/${t.slug}`}
-                    className="text-[16px] transition-colors hover:text-accent"
-                  >
-                    {t.name}
-                    <span className="tnum ml-2 font-mono text-[11.5px] text-subtle">
-                      {t.paper_count}
-                    </span>
+        {topics.length > 0 && (
+          <PageSection label="Research areas">
+            <ul className="op-archive-list">
+              {topics.map((t) => (
+                <li key={t.slug} data-reveal="fade" data-delay="auto">
+                  <Link href={`/topic/${t.slug}`} className="op-row" data-size="s" data-cur="open">
+                    <span>{t.name}</span>
+                    <span className="op-row-count">{t.paper_count}</span>
                   </Link>
-                ))}
-              </div>
-            </SubSection>
-          )}
-
-          {authors.length > 0 && (
-            <SubSection label="Researchers">
-              <div className="space-y-2">
-                {authors.map((a) => (
-                  <div
-                    key={a.slug}
-                    className="flex items-baseline justify-between gap-5"
-                  >
-                    <Link
-                      href={`/author/${a.slug}`}
-                      className="truncate text-[16px] transition-colors hover:text-accent"
-                    >
-                      {a.name}
-                    </Link>
-                    <span className="tnum shrink-0 font-mono text-[12px] text-subtle">
-                      {a.paper_count} papers
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </SubSection>
-          )}
-
-          <SubSection label="Recent papers">
-            <div>
-              {papers.map((p) => (
-                <PaperCard key={p.arxiv_id} paper={p} source="institution" />
+                </li>
               ))}
-            </div>
-          </SubSection>
-        </div>
+            </ul>
+          </PageSection>
+        )}
+
+        {authors.length > 0 && (
+          <PageSection label="Researchers">
+            <ul className="op-archive-list">
+              {authors.map((a) => (
+                <li key={a.slug} data-reveal="fade" data-delay="auto">
+                  <Link href={`/author/${a.slug}`} className="op-row" data-size="s" data-cur="open">
+                    <span>{a.name}</span>
+                    <span className="op-row-count">{a.paper_count} papers</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </PageSection>
+        )}
+
+        <PageSection label="Recent papers" aside={`${papers.length} shown`}>
+          {papers.length > 0 ? (
+            <PaperList>
+              {papers.map((p, i) => (
+                <PaperCard key={p.arxiv_id} paper={p} source="institution" position={i} />
+              ))}
+            </PaperList>
+          ) : (
+            <EmptyNote label="No papers listed">
+              The index hasn&apos;t linked any papers here yet. It rebuilds weekly.
+            </EmptyNote>
+          )}
+        </PageSection>
       </Column>
 
       <Rail>
@@ -139,7 +135,7 @@ export default async function InstitutionPage({
           Papers are attributed from the affiliations printed on them, then
           grouped by normalised institution name.
         </RailNote>
-        <WhereItBreaks className="mt-[22px]">
+        <WhereItBreaks className="mt-[calc(28*var(--px))]">
           A lab that publishes under several names — a university, a department,
           a spin-out — can show up as more than one institution here.
         </WhereItBreaks>

@@ -7,6 +7,10 @@ export interface NavItem {
   label: string;
 }
 
+/**
+ * Índice do paper no trilho: mono, a seção atual em musgo, e o progresso
+ * de leitura como um fio que se enche — nada de barra.
+ */
 export function PaperNav({ items }: { items: NavItem[] }) {
   const [active, setActive] = useState<string | null>(items[0]?.id ?? null);
   const [progress, setProgress] = useState(0);
@@ -41,44 +45,31 @@ export function PaperNav({ items }: { items: NavItem[] }) {
   }, []);
 
   return (
-    <nav className="hidden lg:block">
-      <div className="border-b border-rule-strong pb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-        On this page
+    <nav className="hidden lg:block" aria-label="On this page">
+      <div className="op-rail-head op-label">On this page</div>
+
+      <ol className="m-0 flex list-none flex-col gap-[calc(12*var(--px))] p-0 pt-[calc(18*var(--px))]">
+        {items.map((item, i) => (
+          <li key={item.id}>
+            <a
+              href={`#${item.id}`}
+              aria-current={active === item.id ? "true" : undefined}
+              className={`flex items-baseline gap-[calc(14*var(--px))] font-mono text-[length:var(--t-mono)] font-light tracking-[0.06em] ${
+                active === item.id ? "text-accent" : "text-muted-foreground"
+              }`}
+            >
+              <span className="tnum text-subtle">{String(i + 1).padStart(2, "0")}</span>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-[calc(22*var(--px))] h-px w-full bg-border" aria-hidden="true">
+        <div className="h-px bg-accent" style={{ width: `${progress * 100}%` }} />
       </div>
 
-      <ul className="flex flex-col gap-[11px] border-b border-border py-4">
-        {items.map((item) => {
-          const cls =
-            active === item.id
-              ? "text-accent"
-              : "text-muted-foreground hover:text-foreground";
-          return (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                aria-current={active === item.id ? "true" : undefined}
-                className={`block font-mono text-[12px] transition-colors ${cls}`}
-              >
-                {item.label}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* Progresso de leitura: um fio, não uma barra */}
-      <div
-        className="mt-4 h-px w-full bg-border"
-        role="presentation"
-        aria-hidden="true"
-      >
-        <div
-          className="h-px bg-accent transition-all duration-150"
-          style={{ width: `${progress * 100}%` }}
-        />
-      </div>
-
-      <p className="mt-[18px] font-mono text-[11.5px] leading-[1.75] text-subtle">
+      <p className="op-rail-note">
         Every layer here is generated from the paper itself. The PDF is one
         click away.
       </p>

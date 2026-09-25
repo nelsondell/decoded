@@ -24,16 +24,12 @@ export function CopyField({ value }: { value: string }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <code className="min-w-0 flex-[1_1_280px] overflow-x-auto border border-border bg-background px-3.5 py-3 font-mono text-[13.5px] text-foreground">
+    <div className="flex flex-wrap items-baseline gap-x-[calc(24*var(--px))] gap-y-3 border-b border-foreground pb-[calc(14*var(--px))]">
+      <code className="min-w-0 flex-[1_1_260px] overflow-x-auto font-mono text-[length:calc(16*var(--px))] font-light text-foreground">
         {value}
       </code>
-      <button
-        type="button"
-        onClick={copy}
-        className="flex-none border border-accent bg-accent px-5 py-3 font-mono text-[11.5px] uppercase tracking-[0.14em] text-accent-foreground transition-colors hover:border-accent-deep hover:bg-accent-deep"
-      >
-        {copied ? "Copied" : "Copy"}
+      <button type="button" onClick={copy} className="op-link flex-none">
+        {copied ? "Copied ✓" : "Copy"}
       </button>
     </div>
   );

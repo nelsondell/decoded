@@ -11,6 +11,10 @@ const EXAMPLES = [
   "cutting inference cost without losing accuracy",
 ];
 
+/**
+ * A pergunta em Literata no tamanho de um título, sobre um fio de tinta.
+ * Sem pergunta ainda, os exemplos aparecem como as linhas do arquivo.
+ */
 export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -33,11 +37,15 @@ export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
 
   return (
     <div>
-      <div className="flex items-baseline gap-4 border-b border-rule-strong pb-3">
-        <label
-          htmlFor="ask"
-          className="flex-none font-mono text-[11.5px] uppercase tracking-[0.16em] text-accent"
-        >
+      <form
+        className="op-search"
+        role="search"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit(value);
+        }}
+      >
+        <label htmlFor="ask" className="op-label flex-none text-accent">
           Ask
         </label>
         <input
@@ -47,48 +55,37 @@ export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
           autoComplete="off"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") submit(value);
-          }}
           placeholder="what are you trying to understand?"
-          className="min-w-0 flex-1 bg-transparent font-serif text-[clamp(20px,2.4vw,26px)] leading-[1.35] outline-none"
         />
-        {value.length >= 2 && (
-          <button
-            type="button"
-            onClick={() => submit(value)}
-            className="flex-none border-b border-accent-light pb-0.5 font-mono text-[11.5px] uppercase tracking-[0.14em] text-accent transition-colors hover:border-accent"
-          >
-            Search
+        {value.trim().length >= 2 && (
+          <button type="submit" className="op-link flex-none">
+            Search →
           </button>
         )}
-      </div>
+      </form>
 
       {!params.get("q") && (
-        <div className="mt-[clamp(32px,4vw,44px)]">
-          <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-            Try
-          </p>
-          <div className="flex flex-col">
+        <div className="mt-[calc(64*var(--px))]">
+          <p className="op-label m-0 mb-[calc(18*var(--px))]">Try</p>
+          <ul className="op-archive-list">
             {EXAMPLES.map((ex, i) => (
-              <button
-                key={ex}
-                type="button"
-                onClick={() => {
-                  setValue(ex);
-                  submit(ex);
-                }}
-                className="row-shift flex w-full items-baseline gap-[18px] border-t border-border py-[18px] text-left last:border-b"
-              >
-                <span className="tnum flex-none font-mono text-[11.5px] text-subtle">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="font-serif text-[20px] leading-[1.4]">
-                  {ex}
-                </span>
-              </button>
+              <li key={ex} data-reveal="fade" data-delay="auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue(ex);
+                    submit(ex);
+                  }}
+                  className="op-row w-full border-0 bg-transparent text-left"
+                  data-size="s"
+                  data-cur="ask"
+                >
+                  <span>{ex}</span>
+                  <span className="op-row-count">{String(i + 1).padStart(2, "0")}</span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
     </div>

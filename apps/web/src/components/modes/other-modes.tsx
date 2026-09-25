@@ -2,20 +2,68 @@
 
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { WhereItBreaks } from "@/components/page-shell";
 import type { AnalogyMode, CodeMode, StoryMode } from "@/lib/mode-types";
 
 // O bloco de código vive na segunda superfície, como todo inset do sistema.
-// Nada de painel escuro no meio de uma página de leitura.
+// O tema é montado com as variáveis da paleta, então segue o modo escuro.
 const CODE_STYLE = {
   margin: 0,
   borderRadius: 0,
-  padding: "22px 24px",
-  fontSize: "14px",
-  lineHeight: 1.7,
+  padding: "calc(24 * var(--px)) calc(26 * var(--px))",
+  fontSize: "calc(14 * var(--px))",
+  lineHeight: 1.75,
   background: "transparent",
 } as const;
+
+const BASE = {
+  color: "var(--ink)",
+  fontFamily: "var(--font-data)",
+  fontWeight: 300,
+  direction: "ltr",
+  textAlign: "left",
+  whiteSpace: "pre",
+  wordSpacing: "normal",
+  wordBreak: "normal",
+  tabSize: 4,
+  hyphens: "none",
+} as const;
+
+const OFFPRINT_CODE: Record<string, React.CSSProperties> = {
+  'code[class*="language-"]': BASE,
+  'pre[class*="language-"]': { ...BASE, overflow: "auto" },
+  comment: { color: "var(--ink-3)", fontStyle: "italic" },
+  prolog: { color: "var(--ink-3)" },
+  doctype: { color: "var(--ink-3)" },
+  cdata: { color: "var(--ink-3)" },
+  punctuation: { color: "var(--ink-2)" },
+  operator: { color: "var(--ink-2)" },
+  keyword: { color: "var(--moss)" },
+  builtin: { color: "var(--moss)" },
+  boolean: { color: "var(--moss)" },
+  number: { color: "var(--moss)" },
+  constant: { color: "var(--moss)" },
+  string: { color: "var(--ink-2)" },
+  char: { color: "var(--ink-2)" },
+  "attr-value": { color: "var(--ink-2)" },
+  function: { color: "var(--ink)", fontWeight: 400 },
+  "class-name": { color: "var(--ink)", fontWeight: 400 },
+  decorator: { color: "var(--moss)" },
+  variable: { color: "var(--ink)" },
+  property: { color: "var(--ink)" },
+  regex: { color: "var(--ink-2)" },
+  important: { color: "var(--moss)", fontWeight: 400 },
+};
+
+function Code({ language, children }: { language: string; children: string }) {
+  return (
+    <div className="op-inset overflow-x-auto">
+      <SyntaxHighlighter language={language} style={OFFPRINT_CODE} customStyle={CODE_STYLE}>
+        {children}
+      </SyntaxHighlighter>
+    </div>
+  );
+}
 
 /* ---------------------------------------------------------------- */
 /* Code                                                              */
@@ -30,56 +78,29 @@ export function CodeModeView({ data }: { data: CodeMode }) {
   }
 
   return (
-    <div className="space-y-6">
-      <p className="max-w-[62ch] leading-[1.6] [text-wrap:pretty]">
-        {data.what_it_does}
-      </p>
+    <div className="flex flex-col gap-[calc(32*var(--px))]">
+      <p className="op-prose m-0">{data.what_it_does}</p>
 
-      <div className="bg-surface">
-        <div className="flex items-center justify-between border-b border-border px-6 py-2.5">
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-subtle">
-            {data.language}
-          </span>
-          <button
-            type="button"
-            onClick={copy}
-            className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-70"
-          >
-            {copied ? "Copied" : "Copy"}
+      <div>
+        <div className="op-figcaption mb-0 mt-0 border-t-0 pb-[calc(12*var(--px))] pt-0">
+          <span className="op-label">{data.language}</span>
+          <button type="button" onClick={copy} className="op-link">
+            {copied ? "Copied ✓" : "Copy"}
           </button>
         </div>
-
-        <div className="overflow-x-auto">
-          <SyntaxHighlighter
-            language={data.language}
-            style={oneLight}
-            customStyle={CODE_STYLE}
-          >
-            {data.code}
-          </SyntaxHighlighter>
-        </div>
+        <Code language={data.language}>{data.code}</Code>
       </div>
 
       {data.example_usage && (
         <div>
-          <p className="mb-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-            Example
-          </p>
-          <div className="overflow-x-auto bg-surface">
-            <SyntaxHighlighter
-              language={data.language}
-              style={oneLight}
-              customStyle={CODE_STYLE}
-            >
-              {data.example_usage}
-            </SyntaxHighlighter>
-          </div>
+          <p className="op-label m-0 mb-[calc(12*var(--px))]">Example</p>
+          <Code language={data.language}>{data.example_usage}</Code>
         </div>
       )}
 
       {data.caveats.length > 0 && (
         <WhereItBreaks label="Simplified from the paper">
-          <ul className="space-y-2">
+          <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {data.caveats.map((c, i) => (
               <li key={i} className="relative pl-5">
                 <span aria-hidden="true" className="absolute left-0 text-accent">
@@ -100,45 +121,41 @@ export function CodeModeView({ data }: { data: CodeMode }) {
 /* ---------------------------------------------------------------- */
 export function AnalogyModeView({ data }: { data: AnalogyMode }) {
   return (
-    <div className="space-y-10">
+    <div className="flex flex-col gap-[calc(64*var(--px))]">
       {data.analogies.map((a, i) => (
-        <div
-          key={i}
-          className="border-t border-border pt-6 first:border-t-0 first:pt-0"
-        >
-          <div className="mb-3 flex flex-wrap items-baseline gap-x-3.5">
-            <h3 className="font-serif text-[22px] font-semibold leading-[1.3] tracking-[-0.01em]">
-              {a.concept}
-            </h3>
-            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-subtle">
-              via {a.domain}
-            </span>
+        <div key={i}>
+          <div className="flex flex-wrap items-baseline gap-x-[calc(18*var(--px))] gap-y-1">
+            <h3 className="op-h3">{a.concept}</h3>
+            <span className="op-label">via {a.domain}</span>
           </div>
 
-          <p className="max-w-[62ch] leading-[1.6] [text-wrap:pretty]">
-            {a.setup}
-          </p>
+          <p className="op-prose mb-0 mt-[calc(16*var(--px))]">{a.setup}</p>
 
           {a.mapping.length > 0 && (
-            <div className="mt-5 space-y-2 bg-surface px-5 py-4">
+            <dl className="m-0 mt-[calc(24*var(--px))] border-b border-border">
               {a.mapping.map((m, j) => {
                 const [from, ...to] = m.split("→");
                 return (
                   <div
                     key={j}
-                    className="grid gap-1 text-[15.5px] sm:grid-cols-2 sm:gap-5"
+                    className="grid gap-1 border-t border-border py-[calc(12*var(--px))] sm:grid-cols-2 sm:gap-[calc(24*var(--px))]"
                   >
-                    <span className="text-muted-foreground">{from.trim()}</span>
-                    <span className="text-foreground">
+                    <dt className="font-mono text-[length:calc(14*var(--px))] font-light text-muted-foreground">
+                      {from.trim()}
+                    </dt>
+                    <dd className="m-0 text-[length:calc(17*var(--px))]">
+                      <span aria-hidden="true" className="mr-2 text-accent">
+                        →
+                      </span>
                       {to.join("→").trim()}
-                    </span>
+                    </dd>
                   </div>
                 );
               })}
-            </div>
+            </dl>
           )}
 
-          <WhereItBreaks className="mt-5">{a.where_it_breaks}</WhereItBreaks>
+          <WhereItBreaks className="mt-[calc(28*var(--px))]">{a.where_it_breaks}</WhereItBreaks>
         </div>
       ))}
     </div>
@@ -151,31 +168,24 @@ export function AnalogyModeView({ data }: { data: AnalogyMode }) {
 export function StoryModeView({ data }: { data: StoryMode }) {
   return (
     <div>
-      <div className="space-y-8">
+      <ol className="m-0 flex list-none flex-col gap-[calc(48*var(--px))] p-0">
         {data.beats.map((beat, i) => (
-          <div key={i} className="grid gap-3 sm:grid-cols-[72px_1fr] sm:gap-6">
-            <div className="tnum pt-2 font-mono text-[12px] text-subtle">
-              {beat.year ?? "—"}
-            </div>
+          <li
+            key={i}
+            className="grid gap-2 sm:grid-cols-[calc(96*var(--px))_1fr] sm:gap-[calc(24*var(--px))]"
+          >
+            <span className="op-label tnum pt-[0.6em]">{beat.year ?? "—"}</span>
             <div>
-              <h3 className="mb-2.5 font-serif text-[22px] font-semibold leading-[1.3] tracking-[-0.01em]">
-                {beat.heading}
-              </h3>
-              <p className="max-w-[62ch] leading-[1.6] [text-wrap:pretty]">
-                {beat.body}
-              </p>
+              <h3 className="op-h3">{beat.heading}</h3>
+              <p className="op-prose mb-0 mt-[calc(14*var(--px))]">{beat.body}</p>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ol>
 
-      <div className="mt-10 border-t border-border pt-6">
-        <p className="mb-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-          Where it leaves us
-        </p>
-        <p className="max-w-[62ch] leading-[1.6] [text-wrap:pretty]">
-          {data.where_it_leaves_us}
-        </p>
+      <div className="mt-[calc(56*var(--px))] border-t border-border pt-[calc(14*var(--px))]">
+        <p className="op-label m-0">Where it leaves us</p>
+        <p className="op-big mt-[calc(18*var(--px))]">{data.where_it_leaves_us}</p>
       </div>
     </div>
   );

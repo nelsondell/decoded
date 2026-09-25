@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Column,
-  PageLead,
+  ErrorNote,
+  Masthead,
   PageShell,
-  PageTitle,
   Rail,
   RailHeading,
   RailNote,
 } from "@/components/page-shell";
-import { api } from "@/lib/api";
+import { api, type InstitutionsListResponse } from "@/lib/api";
+import { rethrowDuringRevalidation } from "@/lib/isr";
 
 export const revalidate = 1800;
 
@@ -19,46 +20,47 @@ export const metadata: Metadata = {
 };
 
 export default async function InstitutionsPage() {
-  const data = await api.getInstitutions(100);
+  let data: InstitutionsListResponse | null = null;
+  let error: string | null = null;
+  try {
+    data = await api.getInstitutions(100);
+  } catch (e) {
+    rethrowDuringRevalidation(e);
+    error = e instanceof Error ? e.message : "Unknown error";
+  }
 
   return (
     <PageShell>
+      <Masthead
+        kicker={
+          <>
+            <span>People</span>
+            <Link href="/authors" className="op-link">
+              Authors →
+            </Link>
+          </>
+        }
+        title="Institutions"
+        lead="Labs and universities behind the papers in the corpus, ranked by output."
+      />
+
       <Column>
-        <div className="mb-[22px] flex flex-wrap items-baseline justify-between gap-4">
-          <PageTitle>Institutions</PageTitle>
-          <Link
-            href="/authors"
-            className="font-mono text-[12px] uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-70"
-          >
-            Authors →
-          </Link>
-        </div>
-
-        <PageLead className="mb-[clamp(32px,4vw,44px)]">
-          Labs and universities behind the papers in the corpus, ranked by
-          output.
-        </PageLead>
-
-        <div className="border-t border-rule-strong">
-          {(data.institutions ?? []).map((i) => (
-            <div
-              key={i.slug}
-              className="row-shift group border-b border-border last:border-b-0"
-            >
-              <Link
-                href={`/institution/${i.slug}`}
-                className="flex items-baseline justify-between gap-5 py-4"
-              >
-                <p className="min-w-0 truncate text-[16.5px] transition-colors group-hover:text-accent">
-                  {i.name}
-                </p>
-                <span className="tnum shrink-0 font-mono text-[12px] text-subtle">
+        {error && <ErrorNote title="Institutions unavailable" message={error} />}
+        <ul className="op-archive-list">
+          {(data?.institutions ?? []).map((i) => (
+            <li key={i.slug} data-reveal="fade" data-delay="auto">
+              <Link href={`/institution/${i.slug}`} className="op-row" data-size="s" data-cur="open">
+                <span className="op-row-main">
+                  <span>{i.name}</span>
+                  {i.country_code && <span className="op-row-sub">{i.country_code}</span>}
+                </span>
+                <span className="op-row-count">
                   {i.paper_count} papers · {i.author_count} authors
                 </span>
               </Link>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </Column>
 
       <Rail>

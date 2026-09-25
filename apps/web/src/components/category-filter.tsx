@@ -6,6 +6,7 @@ import { categoryLabel } from "@/lib/format";
 
 const CATEGORIES = ["cs.AI", "cs.CL", "cs.LG", "cs.CV"] as const;
 
+/** Filtros do arquivo: a tipografia da navegação, sublinhado no ativo. */
 export function CategoryFilter() {
   const pathname = usePathname();
   const params = useSearchParams();
@@ -22,47 +23,35 @@ export function CategoryFilter() {
     return qs ? `${pathname}?${qs}` : pathname;
   }
 
-  const item =
-    "font-mono text-[12px] uppercase tracking-[0.14em] transition-colors";
-
   return (
-    <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-7 gap-y-4 border-b border-rule-strong pb-3">
-      <div className="flex flex-wrap gap-x-[22px] gap-y-2">
-        <Link
-          href={buildHref({ category: null })}
-          className={`${item} ${
-            active === null
-              ? "text-foreground"
-              : "text-subtle hover:text-foreground"
-          }`}
-        >
-          All
-        </Link>
+    <nav className="op-tabs" aria-label="Filter papers">
+      <Link
+        href={buildHref({ category: null })}
+        className="op-nav-link"
+        aria-current={active === null ? "page" : undefined}
+      >
+        All
+      </Link>
 
-        {CATEGORIES.map((c) => (
-          <Link
-            key={c}
-            href={buildHref({ category: c })}
-            title={categoryLabel(c)}
-            className={`${item} ${
-              active === c
-                ? "text-foreground"
-                : "text-subtle hover:text-foreground"
-            }`}
-          >
-            {c.replace("cs.", "")}
-          </Link>
-        ))}
-      </div>
+      {CATEGORIES.map((c) => (
+        <Link
+          key={c}
+          href={buildHref({ category: c })}
+          title={categoryLabel(c)}
+          className="op-nav-link"
+          aria-current={active === c ? "page" : undefined}
+        >
+          {c.replace("cs.", "")}
+        </Link>
+      ))}
 
       <Link
         href={buildHref({ decoded: decodedOnly ? null : "1" })}
-        className={`${item} ${
-          decodedOnly ? "text-accent" : "text-subtle hover:text-foreground"
-        }`}
+        className="op-nav-link op-tabs-aside"
+        data-on={decodedOnly ? "" : undefined}
       >
         Decoded only
       </Link>
-    </div>
+    </nav>
   );
 }

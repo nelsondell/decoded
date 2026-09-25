@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Column,
-  PageLead,
+  ErrorNote,
+  Masthead,
   PageShell,
-  PageTitle,
   Rail,
   RailHeading,
   RailNote,
 } from "@/components/page-shell";
-import { api } from "@/lib/api";
+import { api, type PeopleListResponse } from "@/lib/api";
+import { rethrowDuringRevalidation } from "@/lib/isr";
 
 export const revalidate = 1800;
 
@@ -19,57 +20,52 @@ export const metadata: Metadata = {
 };
 
 export default async function AuthorsPage() {
-  const data = await api.getAuthors(100);
+  let data: PeopleListResponse | null = null;
+  let error: string | null = null;
+  try {
+    data = await api.getAuthors(100);
+  } catch (e) {
+    rethrowDuringRevalidation(e);
+    error = e instanceof Error ? e.message : "Unknown error";
+  }
 
   return (
     <PageShell>
+      <Masthead
+        kicker={
+          <>
+            <span>People</span>
+            <Link href="/institutions" className="op-link">
+              Institutions →
+            </Link>
+          </>
+        }
+        title="Authors"
+        lead="Researchers with more than one paper in the corpus, ranked by output."
+      />
+
       <Column>
-        <div className="mb-[22px] flex flex-wrap items-baseline justify-between gap-4">
-          <PageTitle>Authors</PageTitle>
-          <Link
-            href="/institutions"
-            className="font-mono text-[12px] uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-70"
-          >
-            Institutions →
-          </Link>
-        </div>
-
-        <PageLead className="mb-[clamp(32px,4vw,44px)]">
-          Researchers with more than one paper in the corpus, ranked by output.
-        </PageLead>
-
-        <div className="border-t border-rule-strong">
-          {(data.authors ?? []).map((a) => (
-            <div
-              key={a.slug}
-              className="row-shift group border-b border-border last:border-b-0"
-            >
-              <Link
-                href={`/author/${a.slug}`}
-                className="flex items-baseline justify-between gap-5 py-4"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-[16.5px] transition-colors group-hover:text-accent">
-                    {a.name}
-                    {!a.is_disambiguated && (
-                      <span className="ml-2.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-subtle">
-                        name match
-                      </span>
-                    )}
-                  </p>
-                  {a.affiliation && (
-                    <p className="truncate font-mono text-[11.5px] text-subtle">
+        {error && <ErrorNote title="Authors unavailable" message={error} />}
+        <ul className="op-archive-list">
+          {(data?.authors ?? []).map((a) => (
+            <li key={a.slug} data-reveal="fade" data-delay="auto">
+              <Link href={`/author/${a.slug}`} className="op-row" data-size="s" data-cur="open">
+                <span className="op-row-main">
+                  <span>{a.name}</span>
+                  {(a.affiliation || !a.is_disambiguated) && (
+                    <span className="op-row-sub">
                       {a.affiliation}
-                    </p>
+                      {!a.is_disambiguated && (
+                        <span className="ml-3 uppercase tracking-[0.14em]">name match</span>
+                      )}
+                    </span>
                   )}
-                </div>
-                <span className="tnum shrink-0 font-mono text-[12px] text-subtle">
-                  {a.paper_count} papers
                 </span>
+                <span className="op-row-count">{a.paper_count} papers</span>
               </Link>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </Column>
 
       <Rail>
