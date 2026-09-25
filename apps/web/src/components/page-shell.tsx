@@ -1,57 +1,139 @@
+import { Fragment } from "react";
 import Link from "next/link";
 
+import { RevealScope } from "@/components/offprint/offprint-motion";
 import { cn } from "@/lib/utils";
 
 /**
- * A grade de toda página: coluna de leitura à esquerda, trilho de contexto à
- * direita. O trilho quebra para baixo no mobile e some do fluxo visual sem
- * levar conteúdo junto.
+ * A gramática das páginas internas do Offprint.
+ *
+ * PageShell é a grade de 16 colunas com escopo de entradas; Masthead é o
+ * cabeçalho da página, na grade inteira; Column (10 colunas) e Rail (4)
+ * dividem o corpo com duas colunas de respiro. Em telas estreitas tudo
+ * empilha. Estilos em app/op-pages.css.
  */
 export function PageShell({
   children,
   className,
-  tight = false,
 }: {
   children: React.ReactNode;
   className?: string;
-  tight?: boolean;
 }) {
   return (
-    <main
-      className={cn(
-        "mx-auto flex max-w-[1240px] flex-wrap items-start gap-x-[clamp(40px,5vw,72px)] gap-y-14 px-6 pb-[clamp(64px,8vw,104px)] sm:px-10",
-        tight
-          ? "pt-[clamp(36px,4vw,56px)]"
-          : "pt-[clamp(44px,5vw,76px)]",
-        className,
-      )}
-    >
-      {children}
+    <main>
+      <RevealScope className={cn("op-page", className)}>{children}</RevealScope>
     </main>
   );
 }
 
-/** Coluna de leitura. Mede no máximo ~70ch onde o texto corre longo. */
+/** Palavras mascaradas; o escopo escalona por linha renderizada. */
+export function WordReveal({ text }: { text: string }) {
+  const words = text.split(/\s+/).filter(Boolean);
+  return (
+    <>
+      {words.map((word, i) => (
+        <Fragment key={i}>
+          <span className="op-mask op-mask--word">
+            <span data-reveal="line">{word}</span>
+          </span>
+          {i < words.length - 1 && " "}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+/** Títulos longos (de paper, de tópico) descem um degrau de tipo. */
+function sizeFor(title: string): "l" | "m" | "s" {
+  const n = title.length;
+  return n <= 28 ? "l" : n <= 72 ? "m" : "s";
+}
+
+export function Masthead({
+  back,
+  kicker,
+  title,
+  lead,
+  meta,
+  aside,
+  plate = false,
+}: {
+  back?: { href: string; label: string };
+  kicker?: React.ReactNode;
+  title: string;
+  lead?: React.ReactNode;
+  meta?: React.ReactNode;
+  aside?: React.ReactNode;
+  /** O aside é uma prancha: ocupa seis colunas em vez de cinco. */
+  plate?: boolean;
+}) {
+  return (
+    <header className="op-masthead" data-plate={plate && aside ? "" : undefined}>
+      <div className="op-masthead-body">
+        {back && (
+          <Link
+            href={back.href}
+            className="op-back op-label"
+            data-reveal="fade"
+            data-delay="0"
+          >
+            ← {back.label}
+          </Link>
+        )}
+        {kicker && (
+          <div className="op-kicker op-label" data-reveal="fade" data-delay="60">
+            {kicker}
+          </div>
+        )}
+        <h1
+          className="op-page-title"
+          data-size={sizeFor(title)}
+          data-line-stagger="120,90"
+        >
+          <WordReveal text={title} />
+        </h1>
+        {lead && (
+          <div className="op-lead" data-reveal="fade" data-delay="320">
+            {lead}
+          </div>
+        )}
+        {meta && (
+          <div className="op-meta op-label" data-reveal="fade" data-delay="400">
+            {meta}
+          </div>
+        )}
+      </div>
+      {aside && (
+        <div
+          className="op-masthead-aside"
+          data-reveal={plate ? undefined : "fade"}
+          data-delay={plate ? undefined : "240"}
+        >
+          {aside}
+        </div>
+      )}
+    </header>
+  );
+}
+
+/** Coluna de leitura: dez colunas, ou a grade inteira com `wide`. */
 export function Column({
   children,
   className,
+  wide = false,
 }: {
   children: React.ReactNode;
   className?: string;
+  wide?: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "w-full min-w-0 lg:w-auto lg:flex-[1_1_580px]",
-        className,
-      )}
-    >
+    <div className={cn("op-page-main", className)} data-wide={wide ? "" : undefined}>
       {children}
     </div>
   );
 }
 
-/** Trilho lateral: metadados, explicação do método, limites. */
+/** Trilho lateral: método, limites, navegação. Fixo ao rolar. */
 export function Rail({
   children,
   className,
@@ -60,27 +142,16 @@ export function Rail({
   className?: string;
 }) {
   return (
-    <aside
-      className={cn(
-        "w-full lg:sticky lg:top-[104px] lg:w-auto lg:min-w-[240px] lg:flex-[0_1_264px]",
-        className,
-      )}
-    >
+    <aside className={cn("op-page-rail", className)} data-reveal="fade" data-delay="300">
       {children}
     </aside>
   );
 }
 
-/** Cabeça do trilho: rótulo em mono sobre uma régua forte. */
 export function RailHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="border-b border-rule-strong pb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-      {children}
-    </div>
-  );
+  return <div className="op-rail-head op-label">{children}</div>;
 }
 
-/** Bloco do trilho, separado por fio de cabelo. */
 export function RailBlock({
   children,
   className,
@@ -88,14 +159,9 @@ export function RailBlock({
   children: React.ReactNode;
   className?: string;
 }) {
-  return (
-    <div className={cn("border-b border-border py-[18px]", className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn("op-rail-block", className)}>{children}</div>;
 }
 
-/** Nota corrida do trilho — mono pequeno, entrelinha larga. */
 export function RailNote({
   children,
   className,
@@ -103,21 +169,12 @@ export function RailNote({
   children: React.ReactNode;
   className?: string;
 }) {
-  return (
-    <p
-      className={cn(
-        "mt-[18px] font-mono text-[11.5px] leading-[1.75] text-muted-foreground",
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
+  return <p className={cn("op-rail-note", className)}>{children}</p>;
 }
 
 /**
- * "Where it breaks" — a coisa que mais constrói confiança é nomear onde a
- * própria explicação para de valer.
+ * "Where it breaks" — nomear onde a explicação para de valer é o que mais
+ * constrói confiança. Um fio de musgo à esquerda, nada de caixa.
  */
 export function WhereItBreaks({
   children,
@@ -129,78 +186,55 @@ export function WhereItBreaks({
   className?: string;
 }) {
   return (
-    <div className={cn("border-l-2 border-accent bg-tint px-5 py-4", className)}>
-      <div className="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
-        {label}
-      </div>
-      <div className="text-[15.5px] leading-[1.55] text-foreground/90 [text-wrap:pretty]">
-        {children}
-      </div>
+    <div className={cn("op-note", className)}>
+      <div className="op-note-label op-label">{label}</div>
+      <div className="op-note-body">{children}</div>
     </div>
   );
 }
 
-/** Título de página. Literata, apertado, uma medida curta. */
-export function PageTitle({
-  children,
-  className,
+/** Cabeça de seção: fio acima, rótulo à esquerda, contexto à direita. */
+export function SectionHead({
+  label,
+  aside,
+  as: Tag = "h2",
 }: {
-  children: React.ReactNode;
-  className?: string;
+  label: React.ReactNode;
+  aside?: React.ReactNode;
+  as?: "h2" | "h3" | "div";
 }) {
   return (
-    <h1
-      className={cn(
-        "font-serif text-[clamp(38px,4.8vw,58px)] font-semibold leading-[1.05] tracking-[-0.028em] [text-wrap:pretty]",
-        className,
-      )}
-    >
-      {children}
-    </h1>
-  );
-}
-
-/** Subtítulo/deck sob o título. */
-export function PageLead({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <p
-      className={cn(
-        "max-w-[56ch] text-[19px] leading-[1.6] text-foreground/80 [text-wrap:pretty]",
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-}
-
-/** Rótulo de seção em mono — o registro "isto é um dado, não prosa". */
-export function SectionLabel({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "font-mono text-[11px] uppercase tracking-[0.16em] text-subtle",
-        className,
-      )}
-    >
-      {children}
+    <div className="op-section-head" data-reveal="fade" data-delay="0">
+      <Tag className="op-label m-0">{label}</Tag>
+      {aside && <span className="op-label">{aside}</span>}
     </div>
   );
 }
 
-/** Caixa de erro — função de interface, fora da paleta da marca. */
+export function PageSection({
+  id,
+  label,
+  aside,
+  children,
+  className,
+}: {
+  id?: string;
+  label: React.ReactNode;
+  aside?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section id={id} className={cn("op-section", className)}>
+      <SectionHead label={label} aside={aside} />
+      {children}
+    </section>
+  );
+}
+
+/** Mantido pelo nome antigo: uma seção com rótulo. */
+export const SubSection = PageSection;
+
 export function ErrorNote({
   title,
   message,
@@ -209,16 +243,22 @@ export function ErrorNote({
   message: string;
 }) {
   return (
-    <div className="border-l-2 border-destructive bg-surface px-5 py-4">
-      <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-destructive">
-        {title}
-      </p>
-      <p className="mt-2 text-[15px] text-muted-foreground">{message}</p>
+    <div className="op-note border-destructive" role="status">
+      <div className="op-note-label op-label text-destructive">{title}</div>
+      <div className="op-note-body">{message}</div>
     </div>
   );
 }
 
-/** Número que importa: rótulo em mono, valor em Literata com numerais tabulares. */
+export function Stats({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="op-stats" data-reveal="fade" data-delay="auto">
+      {children}
+    </div>
+  );
+}
+
+/** O número que importa: rótulo em mono, valor em Literata leve. */
 export function Stat({
   label,
   value,
@@ -228,61 +268,56 @@ export function Stat({
   value: React.ReactNode;
   tone?: "default" | "accent" | "muted";
 }) {
-  const toneClass =
-    tone === "accent"
-      ? "text-accent"
-      : tone === "muted"
-        ? "text-muted-foreground"
-        : "";
-
   return (
-    <div>
-      <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-        {label}
-      </p>
-      <p
-        className={`tnum mt-1.5 font-serif text-[30px] font-bold leading-none tracking-[-0.03em] ${toneClass}`}
-      >
+    <div className="op-stat">
+      <p className="op-label m-0">{label}</p>
+      <p className="op-stat-value" data-tone={tone === "default" ? undefined : tone}>
         {value}
       </p>
     </div>
   );
 }
 
-/** Seção secundária: rótulo em mono sobre fio de cabelo. */
-export function SubSection({
+/** Estado vazio: um rótulo e uma frase, entre fios. */
+export function EmptyNote({
   label,
   children,
-  className,
 }: {
   label: string;
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <section className={cn("border-t border-border pt-7", className)}>
-      <h2 className="mb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-        {label}
-      </h2>
-      {children}
-    </section>
+    <div className="border-y border-border py-[calc(44*var(--px))]">
+      <p className="op-label m-0">{label}</p>
+      <p className="op-big mt-[calc(16*var(--px))] max-w-[34ch]">{children}</p>
+    </div>
   );
 }
 
-/** Link de volta ao índice de onde a página veio. */
-export function BackLink({
-  href,
-  children,
+/** Página de aviso (404, link inválido): só o cabeçalho, com uma saída. */
+export function Notice({
+  kicker,
+  title,
+  body,
+  action,
 }: {
-  href: string;
-  children: React.ReactNode;
+  kicker: string;
+  title: string;
+  body: React.ReactNode;
+  action: { href: string; label: string };
 }) {
   return (
-    <Link
-      href={href}
-      className="inline-block border-b border-accent-light pb-0.5 font-mono text-[11.5px] uppercase tracking-[0.14em] text-accent transition-colors hover:border-accent"
-    >
-      {children}
-    </Link>
+    <PageShell>
+      <Masthead
+        kicker={<span>{kicker}</span>}
+        title={title}
+        lead={body}
+        meta={
+          <Link href={action.href} className="op-link">
+            {action.label}
+          </Link>
+        }
+      />
+    </PageShell>
   );
 }

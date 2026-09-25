@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { PaperCard } from "@/components/paper-card";
+import { PaperCard, PaperList } from "@/components/paper-card";
 import { TimelineChart } from "@/components/topics/timeline-chart";
 import {
-  BackLink,
   Column,
+  EmptyNote,
+  Masthead,
+  PageSection,
   PageShell,
-  PageTitle,
   Rail,
   RailHeading,
   RailNote,
   Stat,
-  SubSection,
+  Stats,
   WhereItBreaks,
 } from "@/components/page-shell";
 import { ApiError, api } from "@/lib/api";
@@ -47,6 +48,13 @@ const MOMENTUM_COPY: Record<string, string> = {
   quiet: "Quiet",
 };
 
+function formatMomentum(label: string, value: number): string {
+  if (label === "new") return "new";
+  const pct = Math.round(value * 100);
+  if (pct === 0) return "0%";
+  return pct > 0 ? `+${pct}%` : `−${Math.abs(pct)}%`;
+}
+
 export default async function TopicPage({
   params,
 }: {
@@ -67,97 +75,78 @@ export default async function TopicPage({
   const authors = topic.top_authors ?? [];
   const papers = topic.papers ?? [];
 
-  const momentumPct = Math.round(topic.momentum * 100);
-
   return (
-    <PageShell tight>
-      <Column>
-        <BackLink href="/topics">← Topics</BackLink>
-
-        <div className="mt-7 flex items-start justify-between gap-6">
-          <PageTitle className="min-w-0 text-[clamp(32px,4.2vw,48px)]">
-            {topic.name}
-          </PageTitle>
-          <div className="shrink-0">
-            <FollowButton targetType="topic" slug={topic.slug} />
-          </div>
-        </div>
-
-        {topic.description && (
-          <p className="mt-5 max-w-[58ch] text-[18px] leading-[1.6] text-muted-foreground [text-wrap:pretty]">
-            {topic.description}
-          </p>
-        )}
-
-        {keywords.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-subtle">
-            {keywords.slice(0, 8).map((k) => (
+    <PageShell>
+      <Masthead
+        back={{ href: "/topics", label: "Topics" }}
+        kicker={
+          <>
+            <span>Topic</span>
+            {keywords.slice(0, 5).map((k) => (
               <span key={k}>{k}</span>
             ))}
-          </div>
-        )}
+          </>
+        }
+        title={topic.name}
+        lead={topic.description ?? undefined}
+        aside={<FollowButton targetType="topic" slug={topic.slug} />}
+      />
 
-        <div className="mt-9 grid grid-cols-3 gap-6 border-y border-border py-6">
+      <Column>
+        <Stats>
           <Stat label="Papers" value={topic.paper_count} />
           <Stat label="Last 4 weeks" value={topic.recent_papers} />
           <Stat
             label={MOMENTUM_COPY[topic.momentum_label] ?? "Trend"}
             tone={
-              topic.momentum_label === "rising"
+              topic.momentum_label === "rising" || topic.momentum_label === "new"
                 ? "accent"
                 : topic.momentum_label === "cooling"
                   ? "muted"
                   : "default"
             }
-            value={
-              topic.momentum_label === "new"
-                ? "—"
-                : momentumPct > 0
-                  ? `+${momentumPct}%`
-                  : `−${Math.abs(momentumPct)}%`
-            }
+            value={formatMomentum(topic.momentum_label, topic.momentum)}
           />
-        </div>
+        </Stats>
 
-        <div className="mt-12 space-y-12">
-          <SubSection label="Papers per week" className="border-t-0 pt-0">
-            <TimelineChart points={timeline} />
-          </SubSection>
+        <PageSection label="Papers per week" aside={`last ${timeline.length} weeks`}>
+          <TimelineChart points={timeline} />
+        </PageSection>
 
-          {authors.length > 0 && (
-            <SubSection label="Most active authors">
-              <div className="space-y-3">
-                {authors.map((a) => (
-                  <div
-                    key={a.name}
-                    className="grid gap-1 sm:grid-cols-[1fr_auto] sm:gap-5"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-[16px]">{a.name}</p>
-                      {a.affiliation && (
-                        <p className="truncate font-mono text-[11.5px] text-subtle">
-                          {a.affiliation}
-                        </p>
-                      )}
-                    </div>
-                    <p className="tnum shrink-0 font-mono text-[12px] text-subtle">
+        {authors.length > 0 && (
+          <PageSection label="Most active authors">
+            <ul className="op-archive-list">
+              {authors.map((a) => (
+                <li key={a.name} data-reveal="fade" data-delay="auto">
+                  <div className="op-row" data-size="s" data-static="">
+                    <span className="op-row-main">
+                      <span>{a.name}</span>
+                      {a.affiliation && <span className="op-row-sub">{a.affiliation}</span>}
+                    </span>
+                    <span className="op-row-count">
                       {a.paper_count} papers
                       {a.total_citations > 0 && ` · ${a.total_citations} cites`}
-                    </p>
+                    </span>
                   </div>
-                ))}
-              </div>
-            </SubSection>
-          )}
-
-          <SubSection label="Papers">
-            <div>
-              {papers.map((p) => (
-                <PaperCard key={p.arxiv_id} paper={p} source="topic" />
+                </li>
               ))}
-            </div>
-          </SubSection>
-        </div>
+            </ul>
+          </PageSection>
+        )}
+
+        <PageSection label="Papers" aside={`${papers.length} shown`}>
+          {papers.length > 0 ? (
+            <PaperList>
+              {papers.map((p, i) => (
+                <PaperCard key={p.arxiv_id} paper={p} source="topic" position={i} />
+              ))}
+            </PaperList>
+          ) : (
+            <EmptyNote label="No papers listed">
+              The index hasn&apos;t linked any papers here yet. It rebuilds weekly.
+            </EmptyNote>
+          )}
+        </PageSection>
       </Column>
 
       <Rail>
@@ -166,7 +155,7 @@ export default async function TopicPage({
           Abstracts are embedded and clustered; the name comes from the
           cluster&apos;s own vocabulary, not from a taxonomy.
         </RailNote>
-        <WhereItBreaks className="mt-[22px]">
+        <WhereItBreaks className="mt-[calc(28*var(--px))]">
           A paper sits in one cluster even when it belongs in two. Work that
           straddles subfields will be under-counted here.
         </WhereItBreaks>

@@ -8,34 +8,33 @@ import type {
   Vocabulary,
 } from "@/lib/decoded-types";
 import { DEEP_DIVE_ORDER } from "@/lib/decoded-types";
-import { Resolve } from "./brand";
+import { PageSection } from "./page-shell";
 import { VocabText } from "./vocab-text";
 
-/* ---------------------------------------------------------------- */
-/* Wrapper comum                                                      */
-/* ---------------------------------------------------------------- */
+/*
+  As camadas do decode no registro do Offprint: cada uma abre com um fio e
+  um rótulo em mono, o texto corre em Literata leve, e nada vive dentro de
+  caixa. O que é dado (números de seção, rótulos) fica em mono ink-3.
+*/
 
-/**
- * Cada camada do decode é aberta pela régua "The Resolve" — fragmentos que
- * viram linha contínua — e por um rótulo em mono. Sem cards, sem elevação.
- */
+/** Cada camada é uma seção com fio e rótulo; o aside vai à direita. */
 export function Section({
   id,
   label,
+  aside,
   children,
 }: {
   id: string;
   label: string;
+  aside?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-28">
-      <Resolve className="mb-8 mt-[34px]" />
-      <h2 className="mb-3.5 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-        {label}
-      </h2>
-      {children}
-    </section>
+    <PageSection id={id} label={label} aside={aside}>
+      <div data-reveal="fade" data-delay="80">
+        {children}
+      </div>
+    </PageSection>
   );
 }
 
@@ -43,11 +42,7 @@ export function Section({
 /* One sentence — o destaque                                          */
 /* ---------------------------------------------------------------- */
 export function OneSentenceBlock({ data }: { data: OneSentence }) {
-  return (
-    <p className="max-w-[56ch] font-serif text-[clamp(21px,2.3vw,25px)] leading-[1.5] [text-wrap:pretty]">
-      {data.text}
-    </p>
-  );
+  return <p className="op-big">{data.text}</p>;
 }
 
 /* ---------------------------------------------------------------- */
@@ -67,13 +62,14 @@ export function SixtySecondBlock({
   terms: VocabTerm[];
 }) {
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-[calc(28*var(--px))]">
       {SIXTY_LABELS.map(({ key, label }) => (
-        <div key={key} className="grid gap-1.5 sm:grid-cols-[96px_1fr] sm:gap-6">
-          <p className="pt-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-            {label}
-          </p>
-          <p className="max-w-[64ch] leading-[1.6] [text-wrap:pretty]">
+        <div
+          key={key}
+          className="grid gap-2 sm:grid-cols-[calc(120*var(--px))_1fr] sm:gap-[calc(24*var(--px))]"
+        >
+          <p className="op-label m-0 pt-[0.45em]">{label}</p>
+          <p className="op-prose m-0">
             <VocabText text={data[key]} terms={terms} />
           </p>
         </div>
@@ -93,22 +89,20 @@ export function DeepDiveBlock({
   terms: VocabTerm[];
 }) {
   return (
-    <div className="space-y-9">
+    <div className="flex flex-col gap-[calc(56*var(--px))]">
       {DEEP_DIVE_ORDER.map((key, i) => {
         const section = data[key];
         if (!section?.body) return null;
 
         return (
           <div key={key}>
-            <div className="mb-2.5 flex items-baseline gap-3.5">
-              <span className="tnum font-mono text-[11.5px] text-subtle">
+            <div className="flex items-baseline gap-[calc(18*var(--px))]">
+              <span className="op-label tnum flex-none">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <h3 className="font-serif text-[22px] font-semibold leading-[1.3] tracking-[-0.01em] [text-wrap:pretty]">
-                {section.heading}
-              </h3>
+              <h3 className="op-h3">{section.heading}</h3>
             </div>
-            <p className="max-w-[64ch] leading-[1.6] [text-wrap:pretty] sm:pl-[34px]">
+            <p className="op-prose mb-0 mt-[calc(16*var(--px))] sm:pl-[calc(38*var(--px))]">
               <VocabText text={section.body} terms={terms} />
             </p>
           </div>
@@ -125,29 +119,23 @@ export function FiguresBlock({ data }: { data: FiguresExplained }) {
   if (data.items.length === 0) return null;
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-[calc(56*var(--px))]">
       {data.items.map((fig, i) => (
-        <figure key={i} className="bg-surface px-6 py-[22px]">
-          <figcaption className="mb-2.5 font-mono text-[12px] tracking-[0.06em] text-accent">
-            {fig.figure_ref}
-          </figcaption>
+        <figure key={i} className="m-0">
+          <p className="op-label m-0 text-accent">{fig.figure_ref}</p>
 
           {fig.caption_from_paper && (
-            <p className="mb-3.5 max-w-[62ch] font-serif text-[15px] italic leading-[1.55] text-subtle">
+            <p className="op-prose op-prose-2 mb-0 mt-[calc(12*var(--px))] text-[length:calc(17*var(--px))] italic">
               {fig.caption_from_paper}
             </p>
           )}
 
-          <p className="max-w-[62ch] text-[17px] leading-[1.55] [text-wrap:pretty]">
-            {fig.plain_language}
-          </p>
+          <p className="op-prose mb-0 mt-[calc(16*var(--px))]">{fig.plain_language}</p>
 
-          <p className="mt-3.5 max-w-[62ch] text-[16px] leading-[1.55] text-muted-foreground [text-wrap:pretty]">
-            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-subtle">
-              Takeaway ·{" "}
-            </span>
-            {fig.key_insight}
-          </p>
+          <figcaption className="op-figcaption">
+            <span>takeaway</span>
+            <span className="max-w-[48ch]">{fig.key_insight}</span>
+          </figcaption>
         </figure>
       ))}
     </div>
@@ -161,15 +149,14 @@ export function AnalogiesBlock({ data }: { data: Analogies }) {
   if (data.items.length === 0) return null;
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col">
       {data.items.map((item, i) => (
-        <div key={i} className="border-l-2 border-accent bg-tint px-5 py-4">
-          <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
-            {item.concept}
-          </p>
-          <p className="max-w-[58ch] text-[16.5px] leading-[1.55] [text-wrap:pretty]">
-            {item.analogy}
-          </p>
+        <div
+          key={i}
+          className="grid gap-2 border-t border-border py-[calc(24*var(--px))] first:border-t-0 first:pt-0 sm:grid-cols-[calc(200*var(--px))_1fr] sm:gap-[calc(24*var(--px))]"
+        >
+          <p className="op-label m-0 pt-[0.45em] text-accent">{item.concept}</p>
+          <p className="op-prose m-0">{item.analogy}</p>
         </div>
       ))}
     </div>
@@ -183,13 +170,16 @@ export function VocabularyBlock({ data }: { data: Vocabulary }) {
   if (data.terms.length === 0) return null;
 
   return (
-    <dl className="flex flex-col gap-3.5">
+    <dl className="m-0 flex flex-col">
       {data.terms.map((t, i) => (
-        <div key={i} className="flex flex-wrap gap-x-4 gap-y-1.5">
-          <dt className="min-w-[150px] font-mono text-[13px] text-accent">
+        <div
+          key={i}
+          className="grid gap-1.5 border-t border-border py-[calc(16*var(--px))] first:border-t-0 first:pt-0 sm:grid-cols-[calc(200*var(--px))_1fr] sm:gap-[calc(24*var(--px))]"
+        >
+          <dt className="font-mono text-[length:calc(14*var(--px))] font-light text-accent">
             {t.term}
           </dt>
-          <dd className="flex-[1_1_300px] text-[16px] leading-[1.55] text-muted-foreground">
+          <dd className="op-prose op-prose-2 m-0 text-[length:calc(17*var(--px))]">
             {t.definition}
           </dd>
         </div>

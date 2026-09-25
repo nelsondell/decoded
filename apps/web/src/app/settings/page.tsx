@@ -3,8 +3,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Column,
+  Masthead,
+  PageSection,
   PageShell,
-  PageTitle,
   Rail,
   RailHeading,
   RailNote,
@@ -15,6 +16,31 @@ interface DigestPrefs {
   enabled: boolean;
   max_papers: number;
   include_general: boolean;
+}
+
+/** Uma preferência: texto à esquerda, escolhas em mono à direita. */
+function Setting({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-baseline justify-between gap-x-[calc(40*var(--px))] gap-y-4 border-t border-border py-[calc(28*var(--px))] first:border-t-0 first:pt-0">
+      <div className="min-w-0 flex-[1_1_320px]">
+        <p className="op-h3">{title}</p>
+        <p className="op-prose op-prose-2 mb-0 mt-[calc(8*var(--px))] max-w-[48ch] text-[length:calc(17*var(--px))]">
+          {hint}
+        </p>
+      </div>
+      <div className="op-tabs flex-none border-b-0" role="group" aria-label={title}>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 export default function SettingsPage() {
@@ -37,93 +63,70 @@ export default function SettingsPage() {
     },
   });
 
-  const toggleClass = (on: boolean) =>
-    `shrink-0 border px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors disabled:opacity-50 ${
-      on
-        ? "border-accent bg-accent text-accent-foreground"
-        : "border-border text-subtle hover:border-accent hover:text-accent"
-    }`;
+  const choice = (on: boolean, label: string, onClick: () => void) => (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={update.isPending}
+      aria-pressed={on}
+      className="op-nav-link disabled:opacity-50"
+    >
+      {label}
+    </button>
+  );
 
   return (
     <PageShell>
+      <Masthead
+        kicker={<span>Account</span>}
+        title="Settings"
+        lead="One email, Tuesdays. Choose whether it comes and how much it carries."
+      />
+
       <Column>
-        <PageTitle className="mb-[clamp(32px,4vw,44px)]">Settings</PageTitle>
-
-        <section>
-          <h2 className="border-b border-rule-strong pb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-            Weekly digest
-          </h2>
-
-          {isLoading && <div className="mt-6 h-24 animate-pulse bg-surface" />}
+        <PageSection label="Weekly digest" aside={update.isPending ? "saving…" : undefined}>
+          {isLoading && <div className="h-24 animate-pulse bg-surface" />}
 
           {prefs && (
-            <div className="mt-6 space-y-7">
-              <div className="flex items-start justify-between gap-6">
-                <div>
-                  <p className="text-[17px]">Send me the weekly digest</p>
-                  <p className="mt-1.5 max-w-[52ch] text-[15.5px] leading-[1.55] text-muted-foreground">
-                    Papers from the topics, authors, and institutions you follow.
-                    Tuesdays.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => update.mutate({ enabled: !prefs.enabled })}
-                  disabled={update.isPending}
-                  className={toggleClass(prefs.enabled)}
-                >
-                  {prefs.enabled ? "On" : "Off"}
-                </button>
-              </div>
+            <div data-reveal="fade" data-delay="80">
+              <Setting
+                title="Send me the weekly digest"
+                hint="Papers from the topics, authors, and institutions you follow. Tuesdays."
+              >
+                {choice(prefs.enabled, "On", () => update.mutate({ enabled: true }))}
+                {choice(!prefs.enabled, "Off", () => update.mutate({ enabled: false }))}
+              </Setting>
 
-              <div className="flex items-start justify-between gap-6 border-t border-border pt-7">
-                <div>
-                  <p className="text-[17px]">Papers per email</p>
-                  <p className="mt-1.5 text-[15.5px] leading-[1.55] text-muted-foreground">
-                    Fewer means a higher bar for each one.
-                  </p>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  {[4, 6, 8, 10].map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => update.mutate({ max_papers: n })}
-                      disabled={update.isPending}
-                      className={`tnum border px-3.5 py-2.5 font-mono text-[12px] transition-colors disabled:opacity-50 ${
-                        prefs.max_papers === n
-                          ? "border-accent text-accent"
-                          : "border-border text-subtle hover:border-accent"
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <Setting title="Papers per email" hint="Fewer means a higher bar for each one.">
+                {[4, 6, 8, 10].map((n) => (
+                  <span key={n} className="tnum">
+                    {choice(prefs.max_papers === n, String(n), () =>
+                      update.mutate({ max_papers: n }),
+                    )}
+                  </span>
+                ))}
+              </Setting>
 
-              <div className="flex items-start justify-between gap-6 border-t border-border pt-7">
-                <div>
-                  <p className="text-[17px]">Fill with general feed</p>
-                  <p className="mt-1.5 max-w-[52ch] text-[15.5px] leading-[1.55] text-muted-foreground">
-                    When you follow nothing, or nothing matched, send the
-                    highest-priority papers instead of nothing.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    update.mutate({ include_general: !prefs.include_general })
-                  }
-                  disabled={update.isPending}
-                  className={toggleClass(prefs.include_general)}
-                >
-                  {prefs.include_general ? "On" : "Off"}
-                </button>
-              </div>
+              <Setting
+                title="Fill with general feed"
+                hint="When you follow nothing, send the highest-priority papers instead of nothing."
+              >
+                {choice(prefs.include_general, "On", () =>
+                  update.mutate({ include_general: true }),
+                )}
+                {choice(!prefs.include_general, "Off", () =>
+                  update.mutate({ include_general: false }),
+                )}
+              </Setting>
             </div>
           )}
-        </section>
+
+          {update.isError && (
+            <p className="op-label mt-[calc(18*var(--px))] text-destructive">
+              That change didn&apos;t save. Try again.
+            </p>
+          )}
+        </PageSection>
       </Column>
 
       <Rail>

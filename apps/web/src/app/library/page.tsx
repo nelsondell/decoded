@@ -2,17 +2,18 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { PaperCardSkeleton } from "@/components/paper-card";
+import { PaperCardSkeleton, PaperList } from "@/components/paper-card";
 import {
   Column,
+  EmptyNote,
+  Masthead,
   PageShell,
-  PageTitle,
   Rail,
   RailHeading,
   RailNote,
 } from "@/components/page-shell";
+import { RelativeTime } from "@/components/relative-time";
 import { useApi } from "@/lib/use-api";
-import { relativeTime } from "@/lib/format";
 
 interface SavedResponse {
   papers: Array<{
@@ -48,67 +49,59 @@ export default function LibraryPage() {
 
   return (
     <PageShell>
-      <Column>
-        <PageTitle className="mb-[22px]">Library</PageTitle>
+      <Masthead
+        kicker={<span>{me?.display_name ?? "Your shelf"}</span>}
+        title="Library"
+        lead="Papers you saved, with whatever layers have been decoded since."
+        meta={
+          me ? (
+            <>
+              <span>{me.plan} plan</span>
+              <span className="tnum">{me.credits_remaining} credits</span>
+              <span className="tnum">{me.saved_count} saved</span>
+              <Link href="/settings" className="op-link">
+                Settings →
+              </Link>
+            </>
+          ) : undefined
+        }
+      />
 
-        {me && (
-          <div className="mb-[clamp(32px,4vw,44px)] flex flex-wrap gap-x-7 gap-y-2 border-b border-rule-strong pb-3.5 font-mono text-[12px] uppercase tracking-[0.1em] text-muted-foreground">
-            <span>{me.plan} plan</span>
-            <span className="tnum">{me.credits_remaining} credits</span>
-            <span className="tnum">{me.saved_count} saved</span>
-          </div>
+      <Column>
+        {isLoading && (
+          <PaperList>
+            <PaperCardSkeleton />
+            <PaperCardSkeleton />
+          </PaperList>
         )}
 
-        <div>
-          {isLoading && (
-            <>
-              <PaperCardSkeleton />
-              <PaperCardSkeleton />
-            </>
-          )}
+        {data && data.papers.length === 0 && (
+          <EmptyNote label="Nothing saved yet">
+            Save a paper from its page and it lands here.
+          </EmptyNote>
+        )}
 
-          {data && data.papers.length === 0 && (
-            <div className="border-b border-border pb-[46px] pt-[42px]">
-              <p className="mb-3.5 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-                Nothing saved yet
-              </p>
-              <p className="max-w-[46ch] font-serif text-[21px] leading-[1.45] [text-wrap:pretty]">
-                Save a paper from its page and it lands here, with the decode
-                that was on it at the time.
-              </p>
-            </div>
-          )}
-
-          {data?.papers.map((p) => (
-            <article
-              key={p.arxiv_id}
-              className="row-shift group border-b border-border last:border-b-0"
-            >
-              <Link href={`/paper/${p.arxiv_id}`} className="block py-6">
-                <div className="mb-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11.5px] tracking-[0.1em] text-subtle">
-                  <span>{p.arxiv_id}</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="tnum">{relativeTime(p.published_at)}</span>
-                  {p.is_decoded && (
-                    <span className="border border-accent-soft px-[7px] py-[3px] text-[10.5px] uppercase tracking-[0.12em] text-accent">
-                      Decoded
+        {data && data.papers.length > 0 && (
+          <ul className="op-entries">
+            {data.papers.map((p) => (
+              <li key={p.arxiv_id} data-reveal="fade" data-delay="auto">
+                <Link href={`/paper/${p.arxiv_id}`} className="op-entry" data-cur="read">
+                  <span className="op-entry-body">
+                    <span className="op-kicker op-label">
+                      <span>arXiv:{p.arxiv_id}</span>
+                      <RelativeTime iso={p.published_at} className="tnum" />
+                      {p.is_decoded && <span className="text-accent">Decoded</span>}
                     </span>
-                  )}
-                </div>
-
-                <h2 className="mb-2.5 max-w-[44ch] font-serif text-[21px] font-semibold leading-[1.3] tracking-[-0.012em] transition-colors [text-wrap:pretty] group-hover:text-accent">
-                  {p.title}
-                </h2>
-
-                {p.one_sentence && (
-                  <p className="max-w-[56ch] text-[16.5px] leading-[1.5] text-muted-foreground [text-wrap:pretty]">
-                    {p.one_sentence}
-                  </p>
-                )}
-              </Link>
-            </article>
-          ))}
-        </div>
+                    <span className="op-entry-title block">{p.title}</span>
+                    {p.one_sentence && (
+                      <span className="op-entry-dek block">{p.one_sentence}</span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </Column>
 
       <Rail>

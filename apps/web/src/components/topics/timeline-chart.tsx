@@ -3,130 +3,101 @@
 import { useState } from "react";
 import type { TopicPoint } from "@/lib/api";
 
-const WIDTH = 640;
-const HEIGHT = 180;
-const PADDING = { top: 16, right: 8, bottom: 28, left: 8 };
+/**
+ * Papers por semana, como uma prancha do Offprint: barras em tinta que
+ * crescem da base ao entrar em tela, a última semana com papers em musgo, eixo
+ * de fio de cabelo, rótulos em mono. O hover troca a legenda de baixo.
+ */
+
+const X0 = 40;
+const X1 = 548;
+const BASE = 250;
+const TOP = 60;
+
+/** Datas em UTC: a semana vem como meia-noite UTC e não pode virar a véspera. */
+function weekLabel(iso: string): string {
+  return new Date(iso)
+    .toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" })
+    .replace("Sept", "Sep")
+    .toLowerCase();
+}
 
 export function TimelineChart({ points }: { points: TopicPoint[] }) {
   const [hovered, setHovered] = useState<number | null>(null);
 
   if (points.length === 0) {
     return (
-      <p className="border-y border-border py-10 font-mono text-[11.5px] uppercase tracking-[0.14em] text-subtle">
-        No timeline data yet
+      <p className="op-label m-0 border-y border-border py-[calc(40*var(--px))]">
+        No timeline yet — snapshots start with the next weekly run
       </p>
     );
   }
 
   const max = Math.max(...points.map((p) => p.papers), 1);
-  const plotW = WIDTH - PADDING.left - PADDING.right;
-  const plotH = HEIGHT - PADDING.top - PADDING.bottom;
-
-  const barW = plotW / points.length;
-  const gap = Math.min(4, barW * 0.2);
+  const n = points.length;
+  const step = (X1 - X0) / n;
+  const width = Math.max(4, Math.min(30, step * 0.6));
+  const last = n - 1;
+  // Em musgo: a semana sob o ponteiro, ou a última que teve papers
+  const latest = points.reduce((a, p, i) => (p.papers > 0 ? i : a), last);
+  const focus = hovered ?? latest;
+  const peak = points.reduce((a, p, i) => (p.papers > points[a].papers ? i : a), 0);
 
   return (
-    <div className="relative">
-      <svg
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        className="w-full"
-        role="img"
-        aria-label="Papers per week"
-      >
-        {/* Linha de base */}
-        <line
-          x1={PADDING.left}
-          y1={PADDING.top + plotH}
-          x2={WIDTH - PADDING.right}
-          y2={PADDING.top + plotH}
-          className="stroke-border"
-          strokeWidth={1}
-        />
+    <figure className="op-plate m-0" data-reveal="plate" data-delay="0">
+      <svg viewBox="0 0 560 300" role="img" aria-label={`Papers per week over ${n} weeks; peak ${points[peak].papers} in the week of ${weekLabel(points[peak].week)}`}>
+        <line x1={X0} y1={BASE} x2={X1} y2={BASE} stroke="var(--v-200)" strokeWidth={1.25} />
+        <line x1={X0} y1={50} x2={X0} y2={BASE} stroke="var(--v-200)" strokeWidth={1.25} />
 
         {points.map((p, i) => {
-          const h = (p.papers / max) * plotH;
-          const x = PADDING.left + i * barW + gap / 2;
-          const y = PADDING.top + plotH - h;
-          const isHovered = hovered === i;
-
+          const h = p.papers > 0 ? Math.max(2, ((BASE - TOP) * p.papers) / max) : 0;
+          const x = X0 + i * step + (step - width) / 2;
           return (
             <g key={p.week}>
-              {/* Área de hover, cobre a coluna inteira */}
               <rect
-                x={PADDING.left + i * barW}
-                y={PADDING.top}
-                width={barW}
-                height={plotH}
+                data-bar=""
+                x={x}
+                y={BASE - h}
+                width={width}
+                height={h}
+                fill={i === focus ? "var(--moss)" : "var(--ink)"}
+                style={{ transitionDelay: `${i * 60}ms` }}
+              />
+              {/* Área de hover: a coluna inteira */}
+              <rect
+                x={X0 + i * step}
+                y={TOP - 10}
+                width={step}
+                height={BASE - TOP + 10}
                 fill="transparent"
                 onMouseEnter={() => setHovered(i)}
                 onMouseLeave={() => setHovered(null)}
-              />
-              <rect
-                x={x}
-                y={y}
-                width={barW - gap}
-                height={Math.max(h, p.papers > 0 ? 2 : 0)}
-                className={
-                  isHovered
-                    ? "fill-accent"
-                    : "fill-accent-soft transition-colors"
-                }
-                pointerEvents="none"
               />
             </g>
           );
         })}
 
-        {/* Rótulos: primeiro, meio, último */}
-        {[0, Math.floor(points.length / 2), points.length - 1].map((i) => {
-          const p = points[i];
-          if (!p) return null;
-          const d = new Date(p.week);
-          return (
-            <text
-              key={`label-${i}`}
-              x={PADDING.left + i * barW + barW / 2}
-              y={HEIGHT - 8}
-              textAnchor="middle"
-              className="fill-[var(--subtle-foreground)] font-mono text-[10px] uppercase tracking-wider"
-            >
-              {d.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}
-            </text>
-          );
-        })}
+        <text x={34} y={64} textAnchor="end" className="op-svg-label" fontSize={9} letterSpacing={1.26} fill="var(--ink-3)">
+          {max}
+        </text>
+        <text x={X0} y={272} className="op-svg-label" fontSize={9} letterSpacing={1.26} fill="var(--ink-3)">
+          {weekLabel(points[0].week).toUpperCase()}
+        </text>
+        <text x={X1} y={272} textAnchor="end" className="op-svg-label" fontSize={9} letterSpacing={1.26} fill="var(--ink-3)">
+          {weekLabel(points[last].week).toUpperCase()}
+        </text>
       </svg>
 
-      {/* Tooltip */}
-      {hovered !== null && points[hovered] && (
-        <div
-          className="pointer-events-none absolute top-0 border border-border bg-background px-3.5 py-2.5"
-          style={{
-            left: `${((hovered + 0.5) / points.length) * 100}%`,
-            transform: "translateX(-50%)",
-          }}
-        >
-          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-subtle">
-            {new Date(points[hovered].week).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })}
-          </p>
-          <p className="tnum mt-1 font-serif text-[22px] font-bold leading-none tracking-[-0.02em]">
-            {points[hovered].papers}
-            <span className="ml-2 font-mono text-[11px] font-normal text-subtle">
-              papers
-            </span>
-          </p>
-          {points[hovered].citations > 0 && (
-            <p className="tnum mt-1.5 font-mono text-[11px] text-subtle">
-              {points[hovered].citations} citations
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+      <figcaption className="op-figcaption">
+        <span>
+          week of {weekLabel(points[focus].week)} · {points[focus].papers} paper
+          {points[focus].papers === 1 ? "" : "s"}
+          {points[focus].citations > 0 && ` · ${points[focus].citations} citations`}
+        </span>
+        <span>
+          peak {points[peak].papers} · {weekLabel(points[peak].week)}
+        </span>
+      </figcaption>
+    </figure>
   );
 }

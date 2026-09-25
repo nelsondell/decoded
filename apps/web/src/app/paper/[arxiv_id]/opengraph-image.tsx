@@ -1,87 +1,42 @@
 import { ImageResponse } from "next/og";
+import { OG, OG_SIZE, OgMeta, ogFonts } from "@/lib/og";
 
-export const runtime = "edge";
-export const alt = "Decoded paper";
-export const size = { width: 1200, height: 630 };
+export const runtime = "nodejs";
+export const alt = "Decoded paper summary";
+export const size = OG_SIZE;
 export const contentType = "image/png";
 
 const API_BASE = process.env.API_INTERNAL_URL ?? "http://localhost:8000";
 
-const PAPER = "#F7F6F1";
-const INK = "#16191A";
-const PINE = "#14573C";
-const PINE_LIGHT = "#63BE93";
-const SUBTLE = "#6E7573";
-
-/**
- * O ícone: duas linhas fragmentadas em cima (notação), duas contínuas embaixo
- * (linguagem). Montado com divs porque este cartão é gerado aos milhares.
- */
-function Mark() {
-  const row = (widths: number[], opacity: number) => (
-    <div style={{ display: "flex", gap: 8, opacity }}>
-      {widths.map((w, i) => (
-        <div key={i} style={{ width: w, height: 6, background: PINE }} />
-      ))}
-    </div>
-  );
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      {row([14, 10, 16], 0.45)}
-      {row([24, 24], 0.45)}
-      {row([56], 1)}
-      {row([40], 1)}
-    </div>
-  );
-}
-
-/** O Layer Stack ao fundo, em 8% de Pine. */
-function LayerStack() {
-  return (
-    <div
-      style={{
-        position: "absolute",
-        right: -40,
-        top: "50%",
-        transform: "translateY(-50%)",
-        display: "flex",
-        flexDirection: "column",
-        gap: 26,
-        opacity: 0.08,
-      }}
-    >
-      {[520, 420, 324, 224, 130].map((w) => (
-        <div key={w} style={{ width: w, height: 22, background: PINE }} />
-      ))}
-    </div>
-  );
-}
-
+/** O cartão de um paper: rótulo, título em Literata leve, a frase-resumo. */
 export default async function OgImage({
   params,
 }: {
-  params: { arxiv_id: string };
+  params: Promise<{ arxiv_id: string }>;
 }) {
+  // Next 16: params é uma Promise
+  const { arxiv_id } = await params;
+
   let title = "Decoded";
   let oneSentence: string | null = null;
   let categories: string[] = [];
 
   try {
-    const res = await fetch(`${API_BASE}/v1/papers/${params.arxiv_id}`, {
+    const res = await fetch(`${API_BASE}/v1/papers/${arxiv_id}`, {
       next: { revalidate: 3600 },
     });
     if (res.ok) {
       const paper = await res.json();
       title = paper.title ?? title;
       oneSentence = paper.decoded?.one_sentence?.text ?? null;
-      categories = (paper.categories ?? []).slice(0, 3);
+      categories = (paper.categories ?? []).slice(0, 2);
     }
   } catch {
     // usa os defaults
   }
 
   const truncated = title.length > 110 ? `${title.slice(0, 110)}…` : title;
+  const fontSize = truncated.length > 80 ? 54 : truncated.length > 50 ? 64 : 76;
 
   return new ImageResponse(
     <div
@@ -91,54 +46,41 @@ export default async function OgImage({
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        background: PAPER,
-        padding: "64px 72px",
-        fontFamily: "sans-serif",
-        position: "relative",
+        background: OG.vellum,
+        padding: "64px 76px",
+        fontFamily: "Literata",
+        color: OG.ink,
       }}
     >
-      <LayerStack />
-
-      {/* topo */}
       <div
         style={{
           display: "flex",
-          alignItems: "center",
-          gap: 20,
-          position: "relative",
+          justifyContent: "space-between",
+          alignItems: "baseline",
         }}
       >
-        <Mark />
-        <div
+        <span style={{ fontSize: 34, letterSpacing: "-0.02em" }}>Decoded</span>
+        <span
           style={{
-            display: "flex",
-            fontSize: 30,
-            color: INK,
-            letterSpacing: "-0.02em",
-            fontWeight: 700,
+            fontFamily: "DM Mono",
+            fontSize: 19,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: OG.moss,
           }}
         >
-          Decoded
-        </div>
+          {oneSentence ? "offprint" : "in the queue"}
+        </span>
       </div>
 
-      {/* meio */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 28,
-          position: "relative",
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", gap: 30 }}>
         <div
           style={{
             display: "flex",
-            fontSize: oneSentence ? 46 : 56,
-            lineHeight: 1.15,
-            color: INK,
-            letterSpacing: "-0.025em",
-            fontWeight: 600,
+            fontSize,
+            lineHeight: 1.1,
+            letterSpacing: "-0.028em",
+            maxWidth: 1010,
           }}
         >
           {truncated}
@@ -148,40 +90,19 @@ export default async function OgImage({
           <div
             style={{
               display: "flex",
-              fontSize: 26,
-              lineHeight: 1.4,
-              color: SUBTLE,
-              borderBottom: `3px solid ${PINE_LIGHT}`,
-              paddingBottom: 14,
+              fontSize: 28,
+              lineHeight: 1.45,
+              color: OG.ink2,
               maxWidth: 900,
             }}
           >
-            {oneSentence.length > 130
-              ? `${oneSentence.slice(0, 130)}…`
-              : oneSentence}
+            {oneSentence.length > 130 ? `${oneSentence.slice(0, 130)}…` : oneSentence}
           </div>
         )}
-      </div>
 
-      {/* rodapé */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 24,
-          fontSize: 17,
-          color: SUBTLE,
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          position: "relative",
-        }}
-      >
-        <span>arXiv {params.arxiv_id}</span>
-        {categories.map((c) => (
-          <span key={c}>{c}</span>
-        ))}
+        <OgMeta items={[`arXiv:${arxiv_id}`, ...categories]} />
       </div>
     </div>,
-    size,
+    { ...size, fonts: await ogFonts() },
   );
 }

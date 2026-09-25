@@ -4,8 +4,8 @@ import { SearchResults } from "@/components/search-results";
 import {
   Column,
   ErrorNote,
+  Masthead,
   PageShell,
-  PageTitle,
   Rail,
   RailBlock,
   RailHeading,
@@ -36,23 +36,21 @@ export default async function SearchPage({
 
   return (
     <PageShell>
-      <Column>
-        <PageTitle className="mb-[clamp(36px,4.5vw,56px)]">Search</PageTitle>
+      <Masthead
+        kicker={<span>Across every decoded layer</span>}
+        title="Search"
+        lead="Ask the way you would ask a person. Results quote the passage they matched."
+      />
 
-        <Suspense
-          fallback={<div className="h-12 border-b border-rule-strong" />}
-        >
+      <Column>
+        <Suspense fallback={<div className="op-search h-[calc(72*var(--px))]" />}>
           <SearchBox autoFocus />
         </Suspense>
 
         {q && (
           <Suspense
             key={q}
-            fallback={
-              <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-                Searching…
-              </p>
-            }
+            fallback={<p className="op-label mt-[calc(56*var(--px))]">Searching…</p>}
           >
             <Results query={q} />
           </Suspense>
@@ -61,7 +59,7 @@ export default async function SearchPage({
 
       <Rail>
         <RailHeading>What is searched</RailHeading>
-        <RailBlock className="flex flex-col gap-2.5 font-mono text-[12px] text-muted-foreground">
+        <RailBlock className="flex flex-col gap-2.5 font-mono text-[length:var(--t-mono)] font-light text-muted-foreground">
           {SEARCHED.map((item) => (
             <span key={item}>{item}</span>
           ))}
@@ -90,7 +88,7 @@ async function Results({ query }: { query: string }) {
     );
   } catch (e) {
     return (
-      <div className="mt-10">
+      <div className="mt-[calc(56*var(--px))]">
         <ErrorNote
           title="Search failed"
           message={e instanceof Error ? e.message : "Unknown error"}

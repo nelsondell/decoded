@@ -18,7 +18,7 @@ import {
   type ModesListResponse,
   type StoryMode,
 } from "@/lib/mode-types";
-import { Resolve } from "@/components/brand";
+import { SectionHead } from "@/components/page-shell";
 import { DiagramModeView } from "./diagram-mode";
 import { MathModeView } from "./math-mode";
 import { AnalogyModeView, CodeModeView, StoryModeView } from "./other-modes";
@@ -136,32 +136,30 @@ export function ModeSwitcher({ arxivId }: { arxivId: string }) {
   }
 
   if (isLoading) {
-    return <div className="mt-[34px] h-10 animate-pulse bg-surface" />;
+    return (
+      <section className="op-section" aria-busy="true">
+        <div className="h-10 animate-pulse bg-surface" />
+      </section>
+    );
   }
 
   const modeMap = new Map<string, ModeInfo>(
     (data?.modes ?? []).map((m) => [m.mode, m]),
   );
   const active = activeMode ? modeMap.get(activeMode) : null;
+  const credits =
+    data?.credits_remaining !== null && data?.credits_remaining !== undefined
+      ? data.plan === "pro"
+        ? "unlimited"
+        : `${data.credits_remaining} credits`
+      : null;
 
   return (
-    <section id="modes" className="scroll-mt-28">
-      <Resolve className="mb-8 mt-[34px]" />
+    <section id="modes" className="op-section">
+      <SectionHead label="Explain it different" aside="the same mechanism, five ways" />
 
-      <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
-          Explain it different
-        </h2>
-        <span className="font-mono text-[11.5px] text-subtle">
-          the same mechanism, five ways
-        </span>
-      </div>
-
-      {/* Tabs */}
-      <div
-        role="tablist"
-        className="mb-[30px] mt-[18px] flex flex-wrap items-baseline gap-x-[26px] gap-y-2 border-b border-border"
-      >
+      {/* Abas: a tipografia da navegação, sublinhado de tinta na ativa */}
+      <div role="tablist" aria-label="Explanation modes" className="op-tabs">
         {ALL_MODES.map((mode) => {
           const info = modeMap.get(mode);
           const isActive = activeMode === mode;
@@ -174,33 +172,24 @@ export function ModeSwitcher({ arxivId }: { arxivId: string }) {
               role="tab"
               aria-selected={isActive}
               onClick={() => selectMode(isActive ? null : mode)}
-              className={`-mb-px border-b-2 pb-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors ${
-                isActive
-                  ? "border-accent text-accent"
-                  : "border-transparent text-subtle hover:text-foreground"
-              }`}
+              className="op-nav-link"
             >
               {MODE_LABELS[mode]}
               {ready && !isActive && (
-                <span className="ml-1.5 text-accent-light">·</span>
+                <span className="ml-1.5 text-accent" aria-label="ready">
+                  ·
+                </span>
               )}
             </button>
           );
         })}
 
-        {data?.credits_remaining !== null &&
-          data?.credits_remaining !== undefined && (
-            <span className="tnum ml-auto pb-3 font-mono text-[11px] uppercase tracking-[0.14em] text-subtle">
-              {data.plan === "pro"
-                ? "unlimited"
-                : `${data.credits_remaining} credits`}
-            </span>
-          )}
+        {credits && <span className="op-tabs-aside tnum">{credits}</span>}
       </div>
 
       {/* Conteúdo */}
       {activeMode && (
-        <div>
+        <div className="pt-[calc(40*var(--px))]" data-reveal="fade" data-delay="0" key={activeMode}>
           <ModePanel
             mode={activeMode}
             info={active ?? null}
@@ -247,23 +236,17 @@ function ModePanel({
   }
 
   if (info?.status === "not_applicable") {
-    return (
-      <p className="bg-surface px-6 py-5 text-[16px] text-muted-foreground">
-        This mode doesn&apos;t fit this paper.
-      </p>
-    );
+    return <p className="op-big text-muted-foreground">This mode doesn&apos;t fit this paper.</p>;
   }
 
   if (isGenerating) {
     return (
-      <div className="bg-surface px-8 py-9 text-center">
-        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent">
-          Generating
+      <div role="status">
+        <p className="op-label m-0 text-accent">Generating</p>
+        <p className="op-prose op-prose-2 mb-0 mt-[calc(12*var(--px))]">
+          This takes 20 to 60 seconds. You can keep reading.
         </p>
-        <p className="mt-2.5 text-[16px] text-muted-foreground">
-          This takes 20 to 60 seconds.
-        </p>
-        <div className="mx-auto mt-6 h-px w-32 overflow-hidden bg-border">
+        <div className="mt-[calc(24*var(--px))] h-px w-[calc(160*var(--px))] overflow-hidden bg-border">
           <div className="h-px w-1/3 animate-[slide_1.4s_ease-in-out_infinite] bg-accent" />
         </div>
       </div>
@@ -272,38 +255,35 @@ function ModePanel({
 
   // Não gerado
   return (
-    <div className="bg-surface px-8 py-9 text-center">
-      <p className="font-serif text-[22px] font-semibold tracking-[-0.01em]">
-        {MODE_LABELS[mode]}
-      </p>
-      <p className="mx-auto mt-2.5 max-w-[46ch] text-[16px] leading-[1.55] text-muted-foreground [text-wrap:pretty]">
+    <div>
+      <p className="op-big">{MODE_LABELS[mode]}</p>
+      <p className="op-prose op-prose-2 mb-0 mt-[calc(14*var(--px))] max-w-[46ch]">
         {MODE_DESCRIPTIONS[mode]}
       </p>
 
+      {info?.status === "failed" && error == null && (
+        <p className="op-label mb-0 mt-[calc(18*var(--px))] text-destructive">
+          The last attempt at this mode failed.
+        </p>
+      )}
+
       {error != null && (
-        <p className="mt-4 font-mono text-[11.5px] text-destructive">
+        <p className="op-label mb-0 mt-[calc(18*var(--px))] text-destructive">
           {error instanceof Error && error.message.includes("402")
             ? "Out of credits. They reset weekly."
             : "Generation failed. Try again."}
         </p>
       )}
 
-      <div className="mt-7">
+      <div className="mt-[calc(30*var(--px))]">
         {isSignedIn ? (
-          <button
-            type="button"
-            onClick={onGenerate}
-            className="border border-accent bg-accent px-5 py-3 font-mono text-[11.5px] uppercase tracking-[0.14em] text-accent-foreground transition-colors hover:bg-accent-deep hover:border-accent-deep"
-          >
-            Generate · 1 credit
+          <button type="button" onClick={onGenerate} className="op-link" data-cur="make">
+            Generate · 1 credit →
           </button>
         ) : (
           <SignInButton mode="modal">
-            <button
-              type="button"
-              className="border border-accent bg-accent px-5 py-3 font-mono text-[11.5px] uppercase tracking-[0.14em] text-accent-foreground transition-colors hover:bg-accent-deep hover:border-accent-deep"
-            >
-              Sign in to generate
+            <button type="button" className="op-link" data-cur="sign in">
+              Sign in to generate →
             </button>
           </SignInButton>
         )}

@@ -1,51 +1,100 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./offprint.css";
+@import "./op-pages.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+}
 
 /*
-  Decoded design system — Pine on Bone.
+  Decoded design system — Offprint.
 
-  Pine (#14573C) appears once per idea and never as decoration: the link, the
-  defined term, the active tab, the number that changed. Structure comes from
-  hairline rules and whitespace, never from shadows or elevation. Backgrounds
-  are paper, never pure white; ink is never pure black.
+  Vellum, ink and moss. One serif (Literata, light) carries everything that
+  reads as prose; one mono (DM Mono, light) marks everything that is data.
+  Moss appears once per idea: the link under the pointer, the bar that is
+  this paper. Structure comes from hairline rules and whitespace, never from
+  shadows. Sizes scale off --px, one design pixel at a 1512px viewport.
 */
 
 :root {
-  /* Superfícies */
-  --background: #f7f6f1; /* Paper */
-  --surface: #e7e4da; /* Bone Deep — insets, code, table bands */
-  --tint: #e9f0eb; /* Pine 100 — "where it breaks", callouts */
+  /* Escala fluida — 1px de design a 1512px de viewport */
+  --px: clamp(0.74px, calc(100vw / 1512), 1.28px);
+  --pad: 6.2vw;
+  --cols: 16;
+  --gap-scale: calc(24 / 90);
+  --gap: calc(
+    (100vw - var(--pad) * 2) /
+      ((var(--cols) / var(--gap-scale)) + var(--cols) - 1)
+  );
+  --col: calc(var(--gap) / var(--gap-scale));
 
-  --card: #f7f6f1;
-  --card-foreground: #16191a;
-  --popover: #f7f6f1;
-  --popover-foreground: #16191a;
+  /* Paleta */
+  --v-50: #f4f2ec;
+  --v-100: #ebe8df;
+  --v-200: #dcd8cb;
+  --ink: #171a16;
+  --ink-2: #4e534b;
+  --ink-3: #7c8179;
+  --moss: #3d5233;
 
-  /* Texto */
-  --foreground: #16191a; /* Ink */
-  --muted-foreground: #4a5150; /* Texto secundário */
-  --subtle-foreground: #6e7573; /* Metadados, mono, terciário */
+  /* Faces — variáveis do next/font ficam no <html> */
+  --font-display: var(--font-literata), Georgia, serif;
+  --font-data: var(--font-dm-mono), ui-monospace, monospace;
 
-  /* Pine */
-  --primary: #14573c;
-  --primary-foreground: #f7f6f1;
-  --accent: #14573c;
-  --accent-foreground: #f7f6f1;
-  --accent-deep: #0c3a28;
-  --accent-light: #63be93; /* Pine Light — sublinhados, dark mode */
-  --accent-soft: #c4d6c9; /* Pine 200 — marca-texto, bordas de badge */
+  /* Tipo */
+  --t-open: calc(128 * var(--px));
+  --t-title: calc(52 * var(--px));
+  --t-body: calc(20 * var(--px));
+  --t-mono: calc(12 * var(--px));
+  --t-page: calc(88 * var(--px));
 
-  --secondary: #e7e4da;
-  --secondary-foreground: #16191a;
-  --muted: #e7e4da;
+  /* Movimento */
+  --d-fast: 0.28s;
+  --d-base: 0.5s;
+  --d-slow: 0.75s;
+  --d-page: 0.9s;
+  --expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --glide: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --svh: 1vh;
 
-  /* Traços */
-  --border: #e2dfd5; /* Fio de cabelo */
-  --rule-strong: #16191a; /* Régua que abre uma seção */
-  --input: #e2dfd5;
-  --ring: #14573c;
+  /* Papéis semânticos — derivados da paleta, usados pelo Tailwind */
+  --background: var(--v-50);
+  --surface: var(--v-100);
+  --tint: color-mix(in oklab, var(--moss) 9%, var(--v-50));
+
+  --card: var(--v-50);
+  --card-foreground: var(--ink);
+  --popover: var(--v-50);
+  --popover-foreground: var(--ink);
+
+  --foreground: var(--ink);
+  --muted-foreground: var(--ink-2);
+  --subtle-foreground: var(--ink-3);
+
+  --primary: var(--moss);
+  --primary-foreground: var(--v-50);
+  --accent: var(--moss);
+  --accent-foreground: var(--v-50);
+  --accent-deep: color-mix(in oklab, var(--moss) 72%, var(--ink));
+  --accent-light: color-mix(in oklab, var(--moss) 45%, var(--v-50));
+  --accent-soft: color-mix(in oklab, var(--moss) 20%, var(--v-50));
+
+  --secondary: var(--v-100);
+  --secondary-foreground: var(--ink);
+  --muted: var(--v-100);
+
+  --border: var(--v-200);
+  --rule-strong: var(--ink);
+  --input: var(--v-200);
+  --ring: var(--moss);
 
   --destructive: #96341f;
 
@@ -53,38 +102,47 @@
   --radius: 0rem;
 }
 
-.dark {
-  --background: #16191b;
-  --surface: #1e2321;
-  --tint: #1b2a23;
+@supports (height: 100svh) {
+  :root {
+    --svh: 1svh;
+  }
+}
 
-  --card: #16191b;
-  --card-foreground: #efede6;
-  --popover: #1e2321;
-  --popover-foreground: #efede6;
+/*
+  Escuro segue o sistema; data-theme no <html> força um lado. Só a paleta
+  muda — os papéis semânticos são recalculados a partir dela no :root.
+*/
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --v-50: #131610;
+    --v-100: #1a1e17;
+    --v-200: #2b3027;
+    --ink: #e6e2d7;
+    --ink-2: #adb1a5;
+    --ink-3: #8d948a;
+    --moss: #8cbe73;
+    --destructive: #d2705a;
+  }
+}
 
-  --foreground: #efede6;
-  --muted-foreground: #a8afac;
-  --subtle-foreground: #868d8a;
-
-  --primary: #63be93;
-  --primary-foreground: #16191b;
-  --accent: #63be93;
-  --accent-foreground: #16191b;
-  --accent-deep: #8fd4b1;
-  --accent-light: #63be93;
-  --accent-soft: #2e4a3b;
-
-  --secondary: #1e2321;
-  --secondary-foreground: #efede6;
-  --muted: #1e2321;
-
-  --border: #2c312f;
-  --rule-strong: #efede6;
-  --input: #2c312f;
-  --ring: #63be93;
-
+:root[data-theme="dark"] {
+  --v-50: #131610;
+  --v-100: #1a1e17;
+  --v-200: #2b3027;
+  --ink: #e6e2d7;
+  --ink-2: #adb1a5;
+  --ink-3: #8d948a;
+  --moss: #8cbe73;
   --destructive: #d2705a;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --pad: 8vw;
+    --t-open: calc(74 * var(--px));
+    --t-title: calc(38 * var(--px));
+    --t-page: calc(56 * var(--px));
+  }
 }
 
 @theme inline {
@@ -118,9 +176,9 @@
   --radius-md: 0px;
   --radius-lg: 0px;
 
-  --font-serif: var(--font-serif);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+  --font-serif: var(--font-display);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-data);
 }
 
 @layer base {
@@ -129,22 +187,41 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-size: 18px;
-    line-height: 1.6;
+    margin: 0;
+    background: var(--v-50);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: var(--t-body);
+    line-height: 1.62;
     -webkit-font-smoothing: antialiased;
+    text-wrap: pretty;
     font-feature-settings:
       "kern" 1,
       "liga" 1;
   }
 
+  a {
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      color var(--d-fast) var(--expo),
+      border-color var(--d-fast) var(--expo);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    a:hover {
+      color: var(--moss);
+    }
+  }
+
   ::selection {
-    background: var(--accent-soft);
+    background: var(--v-200);
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
+    outline: 2px solid var(--moss);
+    outline-offset: 4px;
   }
 
   input::placeholder,
@@ -158,31 +235,20 @@
   font-variant-numeric: tabular-nums;
 }
 
-/*
-  Deslocamento no hover das linhas da lista. Substitui o card com sombra:
-  a linha anda um pouco para a direita em vez de subir.
-*/
-.row-shift {
-  transition: padding-left 220ms ease;
-}
-.row-shift:hover {
-  padding-left: 10px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .row-shift {
-    transition: none;
-  }
-  .row-shift:hover {
-    padding-left: 0;
-  }
-}
-
 @keyframes slide {
   0% {
     transform: translateX(-100%);
   }
   100% {
     transform: translateX(300%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
   }
 }
