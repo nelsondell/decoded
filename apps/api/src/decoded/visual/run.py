@@ -28,9 +28,10 @@ from anthropic.types.message_create_params import MessageCreateParamsNonStreamin
 from anthropic.types.messages.batch_create_params import Request
 from pydantic import ValidationError
 from sqlalchemy import exists, select
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.dialects.postgresql import array as pg_array
 
-from decoded.db.base import async_session_factory
+from decoded.db.base import async_session_factory, engine
 from decoded.db.models import DecodedContent, IngestionStatus, Paper, ParsedContent
 from decoded.db.repositories.decoded_contents import DecodedContentsRepository
 from decoded.db.repositories.parsed_contents import ParsedContentsRepository
@@ -367,6 +368,18 @@ async def collect(batch_id: str, api_key: str, wait: bool) -> dict:
         from decoded.visual import walkthrough
         storer = walkthrough.store
 
+    async def save(meta: dict, message) -> Outcome:
+        # O pooler do Neon derruba conexões no meio da escrita; uma queda não perde o lote
+        for attempt in range(4):
+            try:
+                return await storer(meta["paper_id"], meta["arxiv_id"], message,
+                                    model, True, texts.get(meta["paper_id"]) or "")
+            except DBAPIError as e:
+                logger.warning("visual.store.retry", arxiv_id=meta["arxiv_id"], attempt=attempt, error=str(e)[:120])
+                await engine.dispose()
+                await asyncio.sleep(3 * (attempt + 1))
+        return Outcome(meta["arxiv_id"], "errored", detail="banco indisponível depois de 4 tentativas")
+
     outcomes: list[Outcome] = []
     async for item in await client.messages.batches.results(batch_id):
         meta = state["papers"].get(item.custom_id)
@@ -374,8 +387,7 @@ async def collect(batch_id: str, api_key: str, wait: bool) -> dict:
             continue
         kind = item.result.type
         if kind == "succeeded":
-            outcomes.append(await storer(meta["paper_id"], meta["arxiv_id"], item.result.message,
-                                        model, True, texts.get(meta["paper_id"]) or ""))
+            outcomes.append(await save(meta, item.result.message))
         else:
             detail = getattr(getattr(item.result, "error", None), "error", None)
             outcomes.append(Outcome(meta["arxiv_id"], kind, detail=str(detail)[:300] if detail else None))
