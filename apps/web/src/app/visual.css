@@ -41,8 +41,13 @@
     letter-spacing: -0.01em;
   }
 
-  .vz-stat-unit[data-word] {
-    margin-left: 0.3em;
+  .vz-stat-unit-line {
+    margin: calc(8 * var(--px)) 0 0;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: calc(24 * var(--px));
+    line-height: 1.2;
+    color: var(--moss);
   }
 
   .vz-stat-label {
@@ -421,12 +426,13 @@
     display: none;
   }
 
-  .vz-source summary::after {
-    content: " +";
+  .vz-source-close,
+  .vz-source[open] .vz-source-open {
+    display: none;
   }
 
-  .vz-source[open] summary::after {
-    content: " −";
+  .vz-source[open] .vz-source-close {
+    display: inline-block;
   }
 
   .vz-source blockquote {
@@ -673,6 +679,99 @@
     height: calc(18 * var(--px));
     color: var(--ink-3);
     transform: translateY(calc(3 * var(--px)));
+  }
+
+  /* ---------- A trava: o resto do paper para quem tem conta ---------- */
+
+  .vz-gate {
+    position: relative;
+    padding-top: calc(28 * var(--px));
+    border-top: 1px solid var(--ink);
+  }
+
+  .vz-gate-anchor {
+    position: absolute;
+    top: 0;
+    scroll-margin-top: calc(120 * var(--px));
+  }
+
+  /* Linhas tarjadas: há texto aqui, só não para quem não entrou */
+  .vz-gate-ghost {
+    display: grid;
+    gap: calc(10 * var(--px));
+    margin-bottom: calc(30 * var(--px));
+  }
+
+  .vz-gate-title {
+    max-width: 24ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: calc(34 * var(--px));
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .vz-gate-list {
+    display: grid;
+    gap: calc(14 * var(--px));
+    margin: calc(26 * var(--px)) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .vz-gate-list li {
+    display: grid;
+    grid-template-columns: calc(28 * var(--px)) minmax(0, 1fr);
+    gap: calc(12 * var(--px));
+    align-items: baseline;
+    max-width: 56ch;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: calc(18 * var(--px));
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .vz-gate-glyph {
+    width: calc(20 * var(--px));
+    height: calc(20 * var(--px));
+    color: var(--moss);
+    transform: translateY(calc(4 * var(--px)));
+  }
+
+  .vz-gate-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(16 * var(--px)) calc(28 * var(--px));
+    margin-top: calc(32 * var(--px));
+  }
+
+  .vz-gate-primary {
+    padding: calc(14 * var(--px)) calc(24 * var(--px));
+    border: 1px solid var(--moss);
+    background: var(--moss);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: calc(18 * var(--px));
+    color: var(--v-50);
+    cursor: pointer;
+    transition:
+      background-color var(--d-fast) var(--expo),
+      border-color var(--d-fast) var(--expo);
+  }
+
+  .vz-gate-primary:hover {
+    border-color: var(--accent-deep);
+    background: var(--accent-deep);
+  }
+
+  .vz-gate-primary:focus-visible {
+    outline: 1px solid var(--moss);
+    outline-offset: 3px;
   }
 
   .vz-deep summary {

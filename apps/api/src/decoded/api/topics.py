@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from decoded.api.deps import rate_limited
 from decoded.api.schemas import (
+    CardStat,
     PaperCard,
     PulseResponse,
     TopicAuthor,
@@ -331,6 +332,7 @@ async def get_topic(
 
     # one_sentence em batch
     one_sentences: dict[int, str] = {}
+    stats: dict[int, CardStat] = {}
     section_counts: dict[int, int] = {}
     if papers:
         dc_stmt = select(DecodedContent).where(
@@ -343,6 +345,8 @@ async def get_topic(
                 text = (row.content or {}).get("text")
                 if text:
                     one_sentences[row.paper_id] = text
+            elif row.section == "visual" and (stat := CardStat.from_visual(row.content)):
+                stats[row.paper_id] = stat
 
     cards = [
         PaperCard(
@@ -357,6 +361,7 @@ async def get_topic(
             hn_mentions=p.hn_mentions,
             is_decoded=section_counts.get(p.id, 0) > 0,
             decoded_sections=[],
+            stat=stats.get(p.id),
         )
         for p in papers
     ]

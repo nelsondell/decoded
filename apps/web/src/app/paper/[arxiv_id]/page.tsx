@@ -15,16 +15,16 @@ import { PaperNav, type NavItem } from "@/components/paper-nav";
 import { Column, Masthead, PageSection, PageShell, Rail } from "@/components/page-shell";
 import { Plate } from "@/components/offprint/plate";
 import { Redacted } from "@/components/brand";
+import { Icon } from "@/components/icons";
 import { ApiError, api } from "@/lib/api";
 import { decoded } from "@/lib/decoded-types";
 import { categoryShort, compactNumber } from "@/lib/format";
 import { issueDate, paperFigure, readingMinutes } from "@/lib/offprint";
 import { SaveButton } from "@/components/save-button";
 import { PaperJsonLd } from "@/components/paper-json-ld";
-import { ModeSwitcher } from "@/components/modes/mode-switcher";
 import { SectionTracker } from "@/components/section-tracker";
-import { PodcastSection } from "@/components/podcast/podcast-section";
-import { VisualPaper, visualNav } from "@/components/visual/visual-paper";
+import { MembersGate } from "@/components/visual/members-gate";
+import { VisualOpen, memberTeaser, visualNav } from "@/components/visual/visual-paper";
 import { visualOf } from "@/lib/visual-types";
 
 export const revalidate = 3600;
@@ -100,7 +100,8 @@ export default async function PaperPage({
 
   const terms = vocab?.terms ?? [];
   const isDecoded = Object.keys(decodedMap).length > 0;
-  const figure = paperFigure(paper);
+  // A figura de capa do decode visual sai dos resultados, que são da parte fechada
+  const figure = visual ? null : paperFigure(paper);
   const authors = paper.authors ?? [];
 
   const navItems: NavItem[] = [
@@ -114,6 +115,8 @@ export default async function PaperPage({
     { id: "modes", label: "Modes" },
     { id: "podcast", label: "Listen" },
   ].filter(Boolean) as NavItem[];
+  const open = new Set(["tldr", "how", "sixty", "deep", "figures", "analogies", "vocabulary"]);
+  const gated = navItems.map((n) => n.id).filter((id) => !open.has(id));
 
   return (
     <>
@@ -126,15 +129,6 @@ export default async function PaperPage({
       <PageShell>
         <Masthead
           back={{ href: "/", label: "Feed" }}
-          kicker={
-            <>
-              <span>arXiv:{paper.arxiv_id}</span>
-              {(paper.categories ?? []).slice(0, 3).map((c) => (
-                <span key={c}>{categoryShort(c)}</span>
-              ))}
-              <span className="tnum">{issueDate(new Date(paper.published_at))}</span>
-            </>
-          }
           title={paper.title}
           lead={
             authors.length > 0 ? (
@@ -149,6 +143,11 @@ export default async function PaperPage({
           }
           meta={
             <>
+              <span>arXiv:{paper.arxiv_id}</span>
+              {(paper.categories ?? []).slice(0, 3).map((c) => (
+                <span key={c}>{categoryShort(c)}</span>
+              ))}
+              <span className="tnum">{issueDate(new Date(paper.published_at))}</span>
               <span className="tnum">{readingMinutes(paper)} min read</span>
               {paper.citation_count > 0 && (
                 <span className="tnum">{compactNumber(paper.citation_count)} citations</span>
@@ -161,7 +160,7 @@ export default async function PaperPage({
                 paper.hn_mentions > 0 && <span className="tnum">HN ×{paper.hn_mentions}</span>
               )}
               <a href={paper.pdf_url} target="_blank" rel="noopener noreferrer" className="op-link">
-                PDF ↗
+                PDF <Icon name="arrow-out" />
               </a>
               <SaveButton arxivId={paper.arxiv_id} />
             </>
@@ -183,15 +182,13 @@ export default async function PaperPage({
             </PageSection>
           )}
 
-          {visual && <VisualPaper v={visual} />}
+          {visual && <VisualOpen v={visual} />}
 
           {!visual && one && (
             <Section id="tldr" label="One sentence">
               <OneSentenceBlock data={one} />
             </Section>
           )}
-
-          <PodcastSection arxivId={paper.arxiv_id} />
 
           {!visual && sixty && (
             <Section id="sixty" label="60-second read" aside="three parts">
@@ -223,7 +220,11 @@ export default async function PaperPage({
             </Section>
           )}
 
-          <ModeSwitcher arxivId={paper.arxiv_id} />
+          <MembersGate
+            arxivId={paper.arxiv_id}
+            teaser={visual ? memberTeaser(visual) : null}
+            anchors={gated}
+          />
 
           <OriginalAbstract abstract={paper.abstract} />
         </Column>

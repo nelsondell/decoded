@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { CopyField } from "@/components/copy-field";
+import { Ledger, LedgerNum, LedgerRow } from "@/components/ledger";
 import {
   Column,
   EmptyNote,
@@ -56,7 +56,6 @@ export default async function ListenPage() {
   return (
     <PageShell>
       <Masthead
-        kicker={<span>Papers as audio</span>}
         title="Listen"
         lead="Every decoded paper as three to eight minutes of audio. Written for the ear — no diagrams, no notation, nothing you need to see."
         meta={
@@ -87,38 +86,23 @@ export default async function ListenPage() {
               Episodes appear here as papers are decoded and read aloud.
             </EmptyNote>
           ) : (
-            <ul className="op-entries">
+            <Ledger columns={["Length", "Episode"]}>
               {episodes.map((ep) => (
-                <li key={ep.arxiv_id} data-reveal="fade" data-delay="auto">
-                  <Link
-                    href={`/paper/${ep.arxiv_id}#podcast`}
-                    className="op-entry"
-                    data-cur="listen"
-                  >
-                    <span className="op-entry-body flex items-start gap-[calc(24*var(--px))]">
-                      <span className="op-play mt-[calc(6*var(--px))]" aria-hidden="true">
-                        <svg width="11" height="13" viewBox="0 0 14 16" fill="currentColor">
-                          <path d="M1 0 L14 8 L1 16 Z" />
-                        </svg>
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="op-kicker op-label">
-                          <span>arXiv:{ep.arxiv_id}</span>
-                          <span className="tnum">{issueDate(new Date(ep.published_at))}</span>
-                          <span className="tnum">
-                            {Math.round(ep.duration_seconds / 60)} min
-                          </span>
-                        </span>
-                        <span className="op-entry-title block">{ep.title}</span>
-                        {ep.one_sentence && (
-                          <span className="op-entry-dek block">{ep.one_sentence}</span>
-                        )}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
+                <LedgerRow
+                  key={ep.arxiv_id}
+                  href={`/paper/${ep.arxiv_id}#podcast`}
+                  num={<LedgerNum value={Math.round(ep.duration_seconds / 60)} unit="min" />}
+                  title={ep.title}
+                  hook={ep.one_sentence}
+                  meta={
+                    <>
+                      <span className="tnum">{issueDate(new Date(ep.published_at))}</span>
+                      <span>arXiv:{ep.arxiv_id}</span>
+                    </>
+                  }
+                />
               ))}
-            </ul>
+            </Ledger>
           )}
         </PageSection>
       </Column>

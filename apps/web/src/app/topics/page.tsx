@@ -10,6 +10,7 @@ import {
   RailNote,
 } from "@/components/page-shell";
 import { api } from "@/lib/api";
+import { Icon } from "@/components/icons";
 
 export const revalidate = 1800;
 
@@ -36,9 +37,13 @@ export default async function TopicsPage({
   return (
     <PageShell>
       <Masthead
-        kicker={<span>The index · {data.total}</span>}
         title="Topics"
         lead="Discovered by clustering paper embeddings rather than assigned by hand, so the names read like the papers, not like a catalogue."
+        meta={
+          <>
+            <span className="tnum">{data.total} topics</span>
+          </>
+        }
       />
 
       <Column>
@@ -54,7 +59,7 @@ export default async function TopicsPage({
             </Link>
           ))}
           <Link href="/pulse" className="op-nav-link op-tabs-aside">
-            Field Pulse →
+            Field Pulse <Icon name="arrow-right" />
           </Link>
         </nav>
 

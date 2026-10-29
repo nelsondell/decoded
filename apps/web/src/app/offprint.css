@@ -1,9 +1,9 @@
 /*
-  Offprint — cabeçalho, capa, rodapé e cursor.
+  Offprint — cabeçalho, rótulos, listas, pranchas, rodapé e cursor.
 
   Medidas, cores, curvas e tempos vêm do protótipo "Decoded Offprint"; tudo
-  escala por --px. As animações de entrada são disparadas por
-  OffprintMotion, que só acrescenta data-shown — o estado inicial escondido
+  escala por --px. As animações de entrada são disparadas por RevealScope
+  (useReveal), que só acrescenta data-shown — o estado inicial escondido
   mora aqui, e o <noscript> do layout o desfaz.
 */
 
@@ -40,6 +40,8 @@
 
   .op-nav {
     display: flex;
+    flex: 1;
+    justify-content: flex-end;
     min-width: 0;
     align-items: baseline;
     gap: calc(30 * var(--px));
@@ -83,6 +85,28 @@
     align-self: center;
   }
 
+  .op-icon {
+    display: inline-block;
+    width: 1.05em;
+    height: 1.05em;
+    vertical-align: -0.2em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: square;
+  }
+
+  .op-account {
+    display: flex;
+    flex: none;
+    align-items: baseline;
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: var(--t-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
   .op-footer {
     display: flex;
     flex-wrap: wrap;
@@ -120,27 +144,37 @@
 
   @media (max-width: 640px) {
     .op-header {
-      flex-wrap: wrap;
-      row-gap: calc(14 * var(--px));
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "mark account"
+        "nav nav";
+      row-gap: calc(12 * var(--px));
+      padding-bottom: 0;
+    }
+    .op-wordmark {
+      grid-area: mark;
+    }
+    .op-account {
+      grid-area: account;
     }
     .op-nav {
-      width: 100%;
+      grid-area: nav;
+      justify-content: flex-start;
+      gap: calc(26 * var(--px));
+      margin-inline: calc(var(--pad) * -1);
+      padding: 0 var(--pad) calc(10 * var(--px));
       overflow-x: auto;
       scrollbar-width: none;
+      /* A borda direita some: há mais itens para o lado */
+      mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
     }
     .op-nav::-webkit-scrollbar {
       display: none;
     }
   }
 
-  /* ---------- Grade ---------- */
-
-  .op-grid {
-    display: grid;
-    grid-template-columns: repeat(16, 1fr);
-    column-gap: var(--gap);
-    padding-inline: var(--pad);
-  }
+  /* ---------- Máscaras e rótulos ---------- */
 
   /* Máscara de linha: o texto sobe de dentro dela */
   .op-mask {
@@ -166,32 +200,7 @@
     color: var(--ink-3);
   }
 
-  /* ---------- Abertura ---------- */
-
-  .op-hero {
-    position: relative;
-    min-height: calc(var(--svh) * 100 - 64 * var(--px));
-    padding-block: calc(40 * var(--px));
-    align-content: end;
-  }
-
-  .op-hero-body {
-    grid-column: 1 / 13;
-  }
-
-  .op-open {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: var(--t-open);
-    line-height: 1.08;
-    letter-spacing: -0.035em;
-    color: var(--ink);
-  }
-
-  .op-open em {
-    font-style: italic;
-  }
+  /* ---------- Linha de dados ---------- */
 
   .op-meta {
     display: flex;
@@ -203,20 +212,7 @@
     border-top: 1px solid var(--v-200);
   }
 
-  .op-cue {
-    position: absolute;
-    right: var(--pad);
-    bottom: calc(40 * var(--px));
-    writing-mode: vertical-rl;
-  }
-
-  /* ---------- Offprint ---------- */
-
-  .op-print {
-    min-height: calc(var(--svh) * 100);
-    padding-block: calc(72 * var(--px));
-    align-content: center;
-  }
+  /* ---------- Pranchas ---------- */
 
   .op-plate {
     margin: 0;
@@ -259,74 +255,9 @@
     text-align: right;
   }
 
-  .op-copy {
-    align-self: center;
-  }
-  .op-copy[data-side="right"] {
-    grid-column: 9 / 17;
-  }
-  .op-copy[data-side="left"] {
-    grid-column: 1 / 9;
-    order: 1;
-  }
-
-  .op-title {
-    margin: calc(22 * var(--px)) 0 0;
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: var(--t-title);
-    line-height: 1.12;
-    letter-spacing: -0.025em;
-    color: var(--ink);
-  }
-
   /* Títulos do arXiv são mais longos que os do protótipo */
-  .op-title[data-size="m"] {
-    font-size: calc(var(--t-title) * 0.8);
-  }
-  .op-title[data-size="s"] {
-    font-size: calc(var(--t-title) * 0.68);
-  }
 
-  .op-dek {
-    margin: calc(28 * var(--px)) 0 0;
-    max-width: 52ch;
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: var(--t-body);
-    line-height: 1.62;
-    color: var(--ink-2);
-  }
-
-  .op-read {
-    display: inline-block;
-    margin-top: calc(34 * var(--px));
-    padding-bottom: calc(8 * var(--px));
-    border-bottom: 1px solid var(--v-200);
-    font-family: var(--font-data);
-    font-weight: 300;
-    font-size: var(--t-mono);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-
-  /* ---------- Arquivo ---------- */
-
-  .op-archive {
-    min-height: calc(var(--svh) * 100);
-    padding-block: calc(96 * var(--px));
-    align-content: center;
-  }
-
-  .op-archive-head {
-    grid-column: 1 / 5;
-    align-self: start;
-  }
-
-  .op-archive-head a {
-    color: var(--ink-3);
-  }
+  /* ---------- Listas ---------- */
 
   .op-archive-list {
     grid-column: 6 / 17;
@@ -364,73 +295,13 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .op-read:hover,
-    .op-archive-head a:hover {
-      color: var(--moss);
-      border-color: var(--moss);
-    }
     .op-row:hover {
       color: var(--moss);
       transform: translateX(14px);
     }
   }
 
-  /* ---------- Colofão ---------- */
-
-  .op-about {
-    min-height: calc(var(--svh) * 100);
-    padding-block: calc(96 * var(--px));
-    align-content: end;
-  }
-
-  .op-about-body {
-    grid-column: 1 / 10;
-  }
-
-  .op-lede {
-    margin: 0;
-    max-width: 22ch;
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: calc(34 * var(--px));
-    line-height: 1.22;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-  }
-
-  .op-colophon {
-    margin-top: calc(32 * var(--px));
-    padding-top: calc(16 * var(--px));
-    border-top: 1px solid var(--v-200);
-  }
-
-  .op-error {
-    grid-column: 1 / 13;
-    margin-top: calc(28 * var(--px));
-    max-width: 60ch;
-    color: var(--ink-2);
-  }
-
-  /* ---------- Contador e cursor ---------- */
-
-  .op-counter {
-    position: fixed;
-    left: var(--pad);
-    bottom: calc(28 * var(--px));
-    z-index: 30;
-    font-family: var(--font-data);
-    font-weight: 300;
-    font-size: var(--t-mono);
-    letter-spacing: 0.14em;
-    color: var(--ink-3);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--d-base) var(--expo);
-  }
-
-  .op-counter[data-visible] {
-    opacity: 1;
-  }
+  /* ---------- Cursor ---------- */
 
   .op-cursor {
     position: fixed;
@@ -492,21 +363,6 @@
     }
   }
 
-  /* ---------- Coluna única ---------- */
-
-  @media (max-width: 900px) {
-    .op-grid[data-stack] {
-      grid-template-columns: 1fr;
-      row-gap: calc(40 * var(--px));
-    }
-    .op-grid[data-stack] > * {
-      grid-column: auto !important;
-    }
-    .op-cue {
-      display: none !important;
-    }
-  }
-
   /* ---------- Entradas ---------- */
 
   [data-reveal="line"] {
@@ -534,13 +390,6 @@
   }
 
   /* Links que entram por fade também mudam de cor no hover */
-  .op-read[data-reveal],
-  .op-archive-head a[data-reveal] {
-    transition:
-      opacity var(--d-slow) var(--glide),
-      color var(--d-fast) var(--expo),
-      border-color var(--d-fast) var(--expo);
-  }
   .op-row[data-reveal] {
     transition:
       opacity var(--d-slow) var(--glide),

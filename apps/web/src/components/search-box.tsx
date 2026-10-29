@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { EVENTS, capture } from "@/lib/analytics";
+import { Icon } from "@/components/icons";
 
 const EXAMPLES = [
   "how do models learn from fewer examples",
@@ -59,7 +60,7 @@ export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
         />
         {value.trim().length >= 2 && (
           <button type="submit" className="op-link flex-none">
-            Search →
+            Search <Icon name="arrow-right" />
           </button>
         )}
       </form>

@@ -9,7 +9,9 @@ import type { DecodedMap } from "@/lib/decoded-types";
 
 export type Glyph =
   | "question" | "data" | "model" | "gear" | "chart" | "check" | "warning"
-  | "search" | "text" | "image" | "robot" | "scale" | "clock" | "compare";
+  | "search" | "text" | "image" | "robot" | "scale" | "clock" | "compare"
+  /* Só da interface (a trava do paper); o decode não escolhe este */
+  | "slider";
 
 export type SimTemplate =
   | "sampling_temperature"

@@ -12,6 +12,7 @@ from decoded.api.schemas import (
     AuthorCard,
     AuthorDetail,
     AuthorTopic,
+    CardStat,
     CoAuthor,
     FollowRequest,
     FollowResponse,
@@ -52,6 +53,7 @@ async def _paper_cards(
         return []
 
     one_sentences: dict[int, str] = {}
+    stats: dict[int, CardStat] = {}
     section_counts: dict[int, int] = {}
 
     stmt = select(DecodedContent).where(
@@ -64,6 +66,8 @@ async def _paper_cards(
             text = (row.content or {}).get("text")
             if text:
                 one_sentences[row.paper_id] = text
+        elif row.section == "visual" and (stat := CardStat.from_visual(row.content)):
+            stats[row.paper_id] = stat
 
     return [
         PaperCard(
@@ -78,6 +82,7 @@ async def _paper_cards(
             hn_mentions=p.hn_mentions,
             is_decoded=section_counts.get(p.id, 0) > 0,
             decoded_sections=[],
+            stat=stats.get(p.id),
         )
         for p in papers
     ]

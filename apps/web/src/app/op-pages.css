@@ -15,7 +15,7 @@
     grid-template-columns: repeat(16, minmax(0, 1fr));
     column-gap: var(--gap);
     align-items: start;
-    padding: 0 var(--pad) calc(128 * var(--px));
+    padding: 0 var(--pad) calc(64 * var(--px));
   }
 
   .op-masthead {
@@ -24,12 +24,17 @@
     grid-template-columns: repeat(16, minmax(0, 1fr));
     column-gap: var(--gap);
     align-items: end;
-    padding-block: calc(88 * var(--px)) calc(72 * var(--px));
+    padding-block: calc(64 * var(--px)) calc(48 * var(--px));
   }
 
   .op-masthead-body {
     grid-column: 1 / 12;
     min-width: 0;
+  }
+
+  /* Sem nada ao lado, o cabeçalho termina onde termina a coluna de leitura */
+  .op-masthead:not(:has(.op-masthead-aside)) .op-masthead-body {
+    grid-column: 1 / 11;
   }
 
   .op-masthead-aside {
@@ -50,15 +55,8 @@
 
   .op-back {
     display: inline-block;
-    margin-bottom: calc(40 * var(--px));
+    margin-bottom: calc(18 * var(--px));
     color: var(--ink-3);
-  }
-
-  .op-kicker {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: calc(8 * var(--px)) calc(18 * var(--px));
   }
 
   .op-page-title {
@@ -69,6 +67,10 @@
     line-height: 1.06;
     letter-spacing: -0.03em;
     color: var(--ink);
+  }
+
+  .op-page-title:first-child {
+    margin-top: 0;
   }
 
   .op-page-title[data-size="m"] {
@@ -116,23 +118,26 @@
   }
 
   .op-rail-block {
-    padding-block: calc(18 * var(--px));
-    border-bottom: 1px solid var(--v-200);
+    padding-bottom: calc(28 * var(--px));
+  }
+
+  .op-rail-block .op-archive-list > li:last-child {
+    border-bottom: 0;
   }
 
   .op-rail-note {
-    margin: calc(18 * var(--px)) 0 0;
-    font-family: var(--font-data);
+    margin: calc(14 * var(--px)) 0 0;
+    font-family: var(--font-display);
     font-weight: 300;
-    font-size: var(--t-mono);
-    line-height: 1.75;
+    font-size: calc(16 * var(--px));
+    line-height: 1.55;
     color: var(--ink-2);
   }
 
   /* ---------- Seções ---------- */
 
   .op-section {
-    margin-top: calc(88 * var(--px));
+    margin-top: calc(72 * var(--px));
     scroll-margin-top: calc(120 * var(--px));
   }
 
@@ -190,55 +195,191 @@
     background: var(--v-100);
   }
 
-  /* ---------- Entradas de lista (papers) ---------- */
+  /* ---------- O livro de achados: a lista do site inteiro ---------- */
 
-  .op-entries {
+  .op-ledger {
+    --ledger-num: calc(150 * var(--px));
+    --ledger-gap: calc(36 * var(--px));
     margin: 0;
     padding: 0;
     list-style: none;
     border-bottom: 1px solid var(--v-200);
   }
 
-  .op-entry {
-    display: block;
-    padding-block: calc(30 * var(--px));
-    border-top: 1px solid var(--v-200);
+  .op-ledger-head,
+  .op-ledger-link {
+    display: grid;
+    grid-template-columns: var(--ledger-num) minmax(0, 1fr);
+    column-gap: var(--ledger-gap);
+  }
+
+  .op-ledger-head {
+    padding-bottom: calc(12 * var(--px));
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: var(--t-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .op-ledger-row {
+    position: relative;
+  }
+
+  /* O fio de cima de cada linha; se desenha da esquerda quando ela entra */
+  .op-ledger-row::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: var(--v-200);
+    transform-origin: left center;
+    transition:
+      transform var(--d-page) var(--expo),
+      background-color var(--d-fast) var(--expo);
+  }
+
+  .op-ledger-link {
+    align-items: start;
+    padding-block: calc(26 * var(--px));
     color: var(--ink);
   }
 
-  .op-entry-title {
-    margin: calc(12 * var(--px)) 0 0;
-    max-width: 38ch;
+  .op-ledger-link:focus-visible {
+    outline: 1px solid var(--moss);
+    outline-offset: calc(6 * var(--px));
+  }
+
+  .op-ledger-num {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: calc(6 * var(--px));
+    transition:
+      opacity var(--d-slow) var(--glide) 0.14s,
+      transform var(--d-slow) var(--expo) 0.14s;
+  }
+
+  .op-ledger-value {
     font-family: var(--font-display);
     font-weight: 300;
-    font-size: calc(30 * var(--px));
-    line-height: 1.2;
-    letter-spacing: -0.015em;
+    font-size: calc(44 * var(--px));
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    overflow-wrap: anywhere;
+    color: var(--moss);
+  }
+
+  .op-ledger-sign {
+    margin-left: 0.04em;
+    font-size: 0.56em;
+    letter-spacing: -0.01em;
+  }
+
+  .op-ledger-unit {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: calc(16 * var(--px));
+    line-height: 1.25;
+    color: var(--moss);
+  }
+
+  .op-ledger-label {
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: calc(12 * var(--px));
+    line-height: 1.45;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+  }
+
+  .op-ledger-label[data-on] {
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--moss);
+  }
+
+  .op-ledger-body {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .op-ledger-title {
+    max-width: 40ch;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: calc(25 * var(--px));
+    line-height: 1.25;
+    letter-spacing: -0.012em;
+    text-wrap: pretty;
     color: var(--ink);
     transition: color var(--d-fast) var(--expo);
   }
 
-  .op-entry-dek {
-    margin: calc(12 * var(--px)) 0 0;
-    max-width: 58ch;
+  .op-ledger-hook {
+    margin-top: calc(8 * var(--px));
+    max-width: 62ch;
     font-family: var(--font-display);
     font-weight: 300;
     font-size: calc(18 * var(--px));
-    line-height: 1.55;
+    line-height: 1.5;
     color: var(--ink-2);
   }
 
-  .op-entry-meta {
+  .op-ledger-meta {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: calc(6 * var(--px)) calc(22 * var(--px));
-    margin-top: calc(16 * var(--px));
+    gap: calc(4 * var(--px)) calc(18 * var(--px));
+    margin-top: calc(12 * var(--px));
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: var(--t-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
   }
 
-  .op-entry-body {
-    display: block;
-    transition: transform var(--d-base) var(--expo);
+  .op-ledger-meta mark {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .op-ledger-value[data-long] {
+    font-size: calc(32 * var(--px));
+  }
+
+  .op-ledger-value[data-long="xl"] {
+    font-size: calc(26 * var(--px));
+    letter-spacing: -0.02em;
+  }
+
+  .op-home-more {
+    margin-top: calc(28 * var(--px));
+  }
+
+  .op-home-shelves {
+    margin: calc(10 * var(--px)) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* A assinatura: o fio se desenha e o número sobe logo depois */
+  .op-ledger-row[data-reveal]::before {
+    transform: scaleX(0);
+  }
+  .op-ledger-row[data-reveal] .op-ledger-num {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+  .op-ledger-row[data-shown]::before {
+    transform: scaleX(1);
+  }
+  .op-ledger-row[data-shown] .op-ledger-num {
+    opacity: 1;
+    transform: none;
   }
 
   .op-row-main {
@@ -259,6 +400,14 @@
   .op-row[data-size="s"] {
     padding-block: calc(20 * var(--px));
     font-size: calc(28 * var(--px));
+  }
+
+  /* Listas curtas: tópicos no trilho da capa, colaboradores, sugestões */
+  .op-row[data-size="xs"] {
+    padding-block: calc(11 * var(--px));
+    font-size: calc(19 * var(--px));
+    line-height: 1.3;
+    letter-spacing: -0.01em;
   }
 
   .op-row[data-size="m"] {
@@ -521,10 +670,10 @@
       color: var(--moss);
       border-color: var(--moss);
     }
-    .op-entry:hover .op-entry-body {
-      transform: translateX(14px);
+    .op-ledger-row:hover::before {
+      background: var(--ink);
     }
-    .op-entry:hover .op-entry-title {
+    .op-ledger-link:hover .op-ledger-title {
       color: var(--moss);
     }
     .op-play:not(:disabled):hover {
@@ -542,13 +691,81 @@
     }
   }
 
+  /* ---------- O livro no celular: coluna de número estreita ---------- */
+
+  @media (max-width: 640px) {
+    .op-ledger {
+      --ledger-num: calc(92 * var(--px));
+      --ledger-gap: calc(18 * var(--px));
+    }
+    .op-ledger-link {
+      padding-block: calc(18 * var(--px));
+    }
+    .op-ledger-value {
+      font-size: calc(34 * var(--px));
+    }
+    .op-ledger-value[data-long] {
+      font-size: calc(25 * var(--px));
+    }
+    .op-ledger-value[data-long="xl"] {
+      font-size: calc(19 * var(--px));
+    }
+    .op-ledger-title {
+      font-size: calc(21 * var(--px));
+    }
+    .op-ledger-hook {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      font-size: calc(17 * var(--px));
+    }
+    .op-ledger-meta {
+      margin-top: calc(8 * var(--px));
+    }
+    /* A capa no celular: o título diz o que é; a frase de apoio fica no desktop */
+    .op-home .op-lead {
+      display: none;
+    }
+    .op-home .op-masthead {
+      padding-top: calc(24 * var(--px));
+    }
+    .op-home .op-meta {
+      margin-top: calc(20 * var(--px));
+    }
+    .op-meta {
+      gap: calc(10 * var(--px)) calc(16 * var(--px));
+    }
+  }
+
+  /* A capa no desktop: o trilho sobe até o cabeçalho, sem vazio à direita,
+     e o primeiro fio dele fica na altura do título */
+  @media (min-width: 901px) {
+    .op-home .op-masthead {
+      grid-column: 1 / 11;
+    }
+    .op-home .op-masthead .op-masthead-body {
+      grid-column: 1 / -1;
+    }
+    .op-home .op-page-rail {
+      grid-row: 1 / span 2;
+      margin-top: calc(64 * var(--px));
+    }
+  }
+
   /* ---------- Coluna única ---------- */
 
   @media (max-width: 900px) {
     .op-page,
     .op-masthead {
       grid-template-columns: minmax(0, 1fr);
-      row-gap: calc(48 * var(--px));
+      row-gap: calc(40 * var(--px));
+    }
+    .op-masthead {
+      padding-block: calc(36 * var(--px)) 0;
+    }
+    .op-section {
+      margin-top: calc(56 * var(--px));
     }
     .op-page > *,
     .op-masthead > * {
@@ -559,6 +776,10 @@
     }
     .op-page-rail {
       position: static;
+    }
+    /* Trilho só com o índice (escondido no celular): sem linha vazia na grade */
+    .op-page-rail:not(:has(> :not(.hidden))) {
+      display: none;
     }
     .op-stats {
       grid-template-columns: minmax(0, 1fr);

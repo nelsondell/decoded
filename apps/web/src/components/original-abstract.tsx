@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "@/components/icons";
 
 export function OriginalAbstract({ abstract }: { abstract: string }) {
   const [open, setOpen] = useState(false);
@@ -15,7 +16,7 @@ export function OriginalAbstract({ abstract }: { abstract: string }) {
           aria-expanded={open}
           className="op-link"
         >
-          {open ? "Original abstract −" : "Original abstract +"}
+          Original abstract <Icon name={open ? "minus" : "plus"} />
         </button>
       </div>
 

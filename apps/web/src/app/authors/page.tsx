@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Ledger, LedgerNum, LedgerRow } from "@/components/ledger";
 import {
   Column,
   ErrorNote,
@@ -11,6 +12,7 @@ import {
 } from "@/components/page-shell";
 import { api, type PeopleListResponse } from "@/lib/api";
 import { rethrowDuringRevalidation } from "@/lib/isr";
+import { Icon } from "@/components/icons";
 
 export const revalidate = 1800;
 
@@ -32,40 +34,31 @@ export default async function AuthorsPage() {
   return (
     <PageShell>
       <Masthead
-        kicker={
+        title="Authors"
+        lead="Researchers with more than one paper in the corpus, ranked by output."
+        meta={
           <>
-            <span>People</span>
             <Link href="/institutions" className="op-link">
-              Institutions →
+              Institutions <Icon name="arrow-right" />
             </Link>
           </>
         }
-        title="Authors"
-        lead="Researchers with more than one paper in the corpus, ranked by output."
       />
 
       <Column>
         {error && <ErrorNote title="Authors unavailable" message={error} />}
-        <ul className="op-archive-list">
+        <Ledger columns={["Papers", "Author"]}>
           {(data?.authors ?? []).map((a) => (
-            <li key={a.slug} data-reveal="fade" data-delay="auto">
-              <Link href={`/author/${a.slug}`} className="op-row" data-size="s" data-cur="open">
-                <span className="op-row-main">
-                  <span>{a.name}</span>
-                  {(a.affiliation || !a.is_disambiguated) && (
-                    <span className="op-row-sub">
-                      {a.affiliation}
-                      {!a.is_disambiguated && (
-                        <span className="ml-3 uppercase tracking-[0.14em]">name match</span>
-                      )}
-                    </span>
-                  )}
-                </span>
-                <span className="op-row-count">{a.paper_count} papers</span>
-              </Link>
-            </li>
+            <LedgerRow
+              key={a.slug}
+              href={`/author/${a.slug}`}
+              num={<LedgerNum value={a.paper_count} unit="papers" />}
+              title={a.name}
+              hook={a.affiliation}
+              meta={!a.is_disambiguated ? <span>name match</span> : undefined}
+            />
           ))}
-        </ul>
+        </Ledger>
       </Column>
 
       <Rail>

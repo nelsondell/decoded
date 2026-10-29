@@ -15,6 +15,7 @@ import {
 } from "@/components/page-shell";
 import { categoryLabel } from "@/lib/format";
 import { api } from "@/lib/api";
+import { Icon } from "@/components/icons";
 
 export const metadata = {
   title: "The archive",
@@ -52,14 +53,15 @@ export default async function ArchivePage({
   return (
     <PageShell>
       <Masthead
-        kicker={
-          <span>
-            The index
-            {initialData ? ` · ${initialData.total.toLocaleString("en-US")}` : ""}
-          </span>
-        }
         title="The archive"
-        lead="Every paper pulled from arXiv, in community-signal order. Decoded ones carry a sixty-second read, a deep dive, figures explained and analogies that name where they break."
+        lead="Every paper pulled from arXiv, in community-signal order. Decoded ones open with their headline number and how the method works."
+        meta={
+          <>
+            {initialData && (
+              <span className="tnum">{initialData.total.toLocaleString("en-US")} papers</span>
+            )}
+          </>
+        }
       />
 
       <Column>
@@ -103,13 +105,13 @@ export default async function ArchivePage({
 
           <RailBlock className="flex flex-col items-start gap-[calc(14*var(--px))]">
             <Link href="/pulse" className="op-link">
-              What&apos;s heating up →
+              What&apos;s heating up <Icon name="arrow-right" />
             </Link>
             <Link href="/topics" className="op-link">
-              Every topic tracked →
+              Every topic tracked <Icon name="arrow-right" />
             </Link>
             <Link href="/listen" className="op-link">
-              Papers as audio →
+              Papers as audio <Icon name="arrow-right" />
             </Link>
           </RailBlock>
 

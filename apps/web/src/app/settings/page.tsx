@@ -78,7 +78,6 @@ export default function SettingsPage() {
   return (
     <PageShell>
       <Masthead
-        kicker={<span>Account</span>}
         title="Settings"
         lead="One email, Tuesdays. Choose whether it comes and how much it carries."
       />

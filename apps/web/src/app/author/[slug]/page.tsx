@@ -69,12 +69,6 @@ export default async function AuthorPage({
     <PageShell>
       <Masthead
         back={{ href: "/authors", label: "Authors" }}
-        kicker={
-          <>
-            <span>Author</span>
-            {!author.is_disambiguated && <span>name match</span>}
-          </>
-        }
         title={author.name}
         lead={
           author.affiliation ? (
@@ -87,6 +81,7 @@ export default async function AuthorPage({
             )
           ) : undefined
         }
+        meta={!author.is_disambiguated ? <span>name match</span> : undefined}
         aside={
           <FollowButton
             targetType="author"
@@ -108,7 +103,7 @@ export default async function AuthorPage({
             <ul className="op-archive-list">
               {topics.map((t) => (
                 <li key={t.slug} data-reveal="fade" data-delay="auto">
-                  <Link href={`/topic/${t.slug}`} className="op-row" data-size="s" data-cur="open">
+                  <Link href={`/topic/${t.slug}`} className="op-row" data-size="xs" data-cur="open">
                     <span>{t.name}</span>
                     <span className="op-row-count">{t.paper_count}</span>
                   </Link>
@@ -123,7 +118,7 @@ export default async function AuthorPage({
             <ul className="op-archive-list">
               {coauthors.map((c) => (
                 <li key={c.slug} data-reveal="fade" data-delay="auto">
-                  <Link href={`/author/${c.slug}`} className="op-row" data-size="s" data-cur="open">
+                  <Link href={`/author/${c.slug}`} className="op-row" data-size="xs" data-cur="open">
                     <span>{c.name}</span>
                     <span className="op-row-count">{c.shared_papers} together</span>
                   </Link>

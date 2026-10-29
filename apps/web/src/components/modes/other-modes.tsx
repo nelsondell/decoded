@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { WhereItBreaks } from "@/components/page-shell";
 import type { AnalogyMode, CodeMode, StoryMode } from "@/lib/mode-types";
+import { Icon } from "@/components/icons";
 
 // O bloco de código vive na segunda superfície, como todo inset do sistema.
 // O tema é montado com as variáveis da paleta, então segue o modo escuro.
@@ -85,7 +86,7 @@ export function CodeModeView({ data }: { data: CodeMode }) {
         <div className="op-figcaption mb-0 mt-0 border-t-0 pb-[calc(12*var(--px))] pt-0">
           <span className="op-label">{data.language}</span>
           <button type="button" onClick={copy} className="op-link">
-            {copied ? "Copied ✓" : "Copy"}
+            {copied ? <>Copied <Icon name="check" /></> : "Copy"}
           </button>
         </div>
         <Code language={data.language}>{data.code}</Code>
@@ -103,9 +104,7 @@ export function CodeModeView({ data }: { data: CodeMode }) {
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
             {data.caveats.map((c, i) => (
               <li key={i} className="relative pl-5">
-                <span aria-hidden="true" className="absolute left-0 text-accent">
-                  ›
-                </span>
+                <Icon name="arrow-right" className="absolute left-0 top-[0.35em] text-accent" />
                 {c}
               </li>
             ))}
@@ -144,9 +143,7 @@ export function AnalogyModeView({ data }: { data: AnalogyMode }) {
                       {from.trim()}
                     </dt>
                     <dd className="m-0 text-[length:calc(17*var(--px))]">
-                      <span aria-hidden="true" className="mr-2 text-accent">
-                        →
-                      </span>
+                      <Icon name="arrow-right" className="mr-2 text-accent" />
                       {to.join("→").trim()}
                     </dd>
                   </div>

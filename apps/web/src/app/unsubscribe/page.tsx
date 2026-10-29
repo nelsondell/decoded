@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Masthead, PageShell } from "@/components/page-shell";
+import { Icon } from "@/components/icons";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "/api").replace(/\/+$/, "");
 
@@ -41,12 +42,11 @@ function UnsubscribeInner() {
   if (state === "error") {
     return (
       <Masthead
-        kicker={<span>Weekly digest</span>}
         title="That link didn’t work"
         lead="The link may be malformed or already used. You can turn the digest off from your settings."
         meta={
           <Link href="/settings" className="op-link">
-            Settings →
+            Settings <Icon name="arrow-right" />
           </Link>
         }
       />
@@ -55,7 +55,6 @@ function UnsubscribeInner() {
 
   return (
     <Masthead
-      kicker={<span>Weekly digest</span>}
       title="Unsubscribed"
       lead={
         <>

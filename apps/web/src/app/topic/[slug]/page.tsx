@@ -79,16 +79,17 @@ export default async function TopicPage({
     <PageShell>
       <Masthead
         back={{ href: "/topics", label: "Topics" }}
-        kicker={
-          <>
-            <span>Topic</span>
-            {keywords.slice(0, 5).map((k) => (
-              <span key={k}>{k}</span>
-            ))}
-          </>
-        }
         title={topic.name}
         lead={topic.description ?? undefined}
+        meta={
+          keywords.length > 0 ? (
+            <>
+              {keywords.slice(0, 5).map((k) => (
+                <span key={k}>{k}</span>
+              ))}
+            </>
+          ) : undefined
+        }
         aside={<FollowButton targetType="topic" slug={topic.slug} />}
       />
 
@@ -118,7 +119,7 @@ export default async function TopicPage({
             <ul className="op-archive-list">
               {authors.map((a) => (
                 <li key={a.name} data-reveal="fade" data-delay="auto">
-                  <div className="op-row" data-size="s" data-static="">
+                  <div className="op-row" data-size="xs" data-static="">
                     <span className="op-row-main">
                       <span>{a.name}</span>
                       {a.affiliation && <span className="op-row-sub">{a.affiliation}</span>}

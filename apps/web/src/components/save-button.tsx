@@ -4,6 +4,7 @@ import { SignInButton, useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/use-api";
 import { EVENTS, capture } from "@/lib/analytics";
+import { Icon } from "@/components/icons";
 
 interface SaveState {
   arxiv_id: string;
@@ -57,7 +58,7 @@ export function SaveButton({ arxivId }: { arxivId: string }) {
       className="op-link"
       data-on={saved ? "" : undefined}
     >
-      {toggle.isPending ? "…" : saved ? "Saved ✓" : "Save"}
+      {toggle.isPending ? "…" : saved ? <>Saved <Icon name="check" /></> : "Save"}
     </button>
   );
 }

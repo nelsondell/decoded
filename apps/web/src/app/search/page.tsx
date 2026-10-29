@@ -37,7 +37,6 @@ export default async function SearchPage({
   return (
     <PageShell>
       <Masthead
-        kicker={<span>Across every decoded layer</span>}
         title="Search"
         lead="Ask the way you would ask a person. Results quote the passage they matched."
       />

@@ -15,6 +15,7 @@ from sqlalchemy.orm import selectinload
 from decoded.api.deps import rate_limited
 from decoded.api.schemas import (
     AuthorOut,
+    CardStat,
     FeedResponse,
     PaperCard,
     PaperDetail,
@@ -128,6 +129,7 @@ async def list_papers(
                 hn_mentions=p.hn_mentions,
                 is_decoded=bool(sections),
                 decoded_sections=sorted(sections.keys()),
+                stat=CardStat.from_visual(sections.get("visual")),
             )
         )
 

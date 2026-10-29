@@ -489,6 +489,24 @@ export interface components {
             /** Paper Count */
             paper_count: number;
         };
+        /**
+         * CardStat
+         * @description O número principal do decode visual, para a linha da lista.
+         */
+        CardStat: {
+            /** Value */
+            value: string;
+            /**
+             * Unit
+             * @default
+             */
+            unit: string;
+            /**
+             * Label
+             * @default
+             */
+            label: string;
+        };
         /** CoAuthor */
         CoAuthor: {
             /** Slug */
@@ -678,6 +696,8 @@ export interface components {
             is_decoded: boolean;
             /** Decoded Sections */
             decoded_sections?: string[];
+            /** @description Número principal do decode visual, quando houver */
+            stat?: components["schemas"]["CardStat"] | null;
         };
         /**
          * PaperDetail

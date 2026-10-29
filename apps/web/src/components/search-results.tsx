@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import type { SearchHit } from "@/lib/api";
+import { Ledger, LedgerNum, LedgerRow } from "@/components/ledger";
 import { EmptyNote, SectionHead } from "@/components/page-shell";
 import { RelativeTime } from "@/components/relative-time";
 import { EVENTS, capture } from "@/lib/analytics";
@@ -40,51 +40,42 @@ export function SearchResults({
         aside={`${reranked ? "ranked by passage match" : "ranked by similarity"} · ${latencyMs}ms`}
       />
 
-      <ul className="op-entries">
+      <Ledger columns={["Match", "Paper"]}>
         {hits.map((hit, i) => (
-          <li key={hit.arxiv_id} data-reveal="fade" data-delay="auto">
-            <Link
-              href={`/paper/${hit.arxiv_id}`}
-              className="op-entry"
-              data-cur="read"
-              onClick={() =>
-                capture(EVENTS.SEARCH_RESULT_CLICKED, {
-                  arxiv_id: hit.arxiv_id,
-                  position: i,
-                  score: hit.score,
-                  from_chunk: !!hit.snippet,
-                })
-              }
-            >
-              <span className="op-entry-body">
-                <span className="op-kicker op-label">
-                  <span>arXiv:{hit.arxiv_id}</span>
-                  <RelativeTime iso={hit.published_at} className="tnum" />
-                  {hit.section && <span>{hit.section}</span>}
-                  <span className="tnum ml-auto">match {hit.score.toFixed(2)}</span>
-                </span>
-
-                <span className="op-entry-title block">{hit.title}</span>
-
-                {hit.one_sentence && (
-                  <span className="op-entry-dek block">{hit.one_sentence}</span>
-                )}
-
-                {hit.snippet && (
-                  <span className="op-entry-dek block">
-                    <span className="op-label mr-2">Matched on</span>
-                    <mark className="op-mark">
-                      {hit.snippet.length > 240
-                        ? `${hit.snippet.slice(0, 240)}…`
-                        : hit.snippet}
-                    </mark>
-                  </span>
-                )}
-              </span>
-            </Link>
-          </li>
+          <LedgerRow
+            key={hit.arxiv_id}
+            href={`/paper/${hit.arxiv_id}`}
+            onClick={() =>
+              capture(EVENTS.SEARCH_RESULT_CLICKED, {
+                arxiv_id: hit.arxiv_id,
+                position: i,
+                score: hit.score,
+                from_chunk: !!hit.snippet,
+              })
+            }
+            num={<LedgerNum value={hit.score.toFixed(2)} label={hit.section ?? "match"} />}
+            title={hit.title}
+            hook={
+              hit.snippet ? (
+                <>
+                  {hit.one_sentence && <span className="block">{hit.one_sentence}</span>}
+                  <mark className="op-mark mt-[calc(8*var(--px))] inline-block">
+                    {hit.snippet.length > 240 ? `${hit.snippet.slice(0, 240)}…` : hit.snippet}
+                  </mark>
+                </>
+              ) : (
+                hit.one_sentence
+              )
+            }
+            meta={
+              <>
+                <RelativeTime iso={hit.published_at} className="tnum" />
+                <span>arXiv:{hit.arxiv_id}</span>
+              </>
+            }
+          />
         ))}
-      </ul>
+      </Ledger>
     </div>
   );
 }

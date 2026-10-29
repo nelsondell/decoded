@@ -54,11 +54,16 @@ export function SiteHeader() {
           >
             Library
           </Link>
+        </Show>
+      </nav>
+
+      {/* A conta fica fora da navegação: no celular, ao lado da marca */}
+      <div className="op-account">
+        <Show when="signed-in">
           <span className="op-nav-user">
             <UserButton />
           </span>
         </Show>
-
         <Show when="signed-out">
           <SignUpButton mode="modal">
             <button type="button" className="op-nav-link" data-emph="">
@@ -66,7 +71,7 @@ export function SiteHeader() {
             </button>
           </SignUpButton>
         </Show>
-      </nav>
+      </div>
     </header>
   );
 }
