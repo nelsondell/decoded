@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useApi } from "@/lib/use-api";
 import { EVENTS, capture } from "@/lib/analytics";
+import { Icon } from "@/components/icons";
 
 interface FollowState {
   target_type: string;
@@ -47,7 +48,7 @@ export function FollowButton({
     return (
       <SignInButton mode="modal">
         <button type="button" className="op-link">
-          Follow +
+          Follow <Icon name="plus" />
         </button>
       </SignInButton>
     );
@@ -62,7 +63,17 @@ export function FollowButton({
       className="op-link"
       data-on={following ? "" : undefined}
     >
-      {toggle.isPending ? "…" : following ? "Following ✓" : "Follow +"}
+      {toggle.isPending ? (
+        "…"
+      ) : following ? (
+        <>
+          Following <Icon name="check" />
+        </>
+      ) : (
+        <>
+          Follow <Icon name="plus" />
+        </>
+      )}
     </button>
   );
 }

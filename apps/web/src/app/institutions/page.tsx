@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Ledger, LedgerNum, LedgerRow } from "@/components/ledger";
 import {
   Column,
   ErrorNote,
@@ -11,6 +12,7 @@ import {
 } from "@/components/page-shell";
 import { api, type InstitutionsListResponse } from "@/lib/api";
 import { rethrowDuringRevalidation } from "@/lib/isr";
+import { Icon } from "@/components/icons";
 
 export const revalidate = 1800;
 
@@ -32,35 +34,35 @@ export default async function InstitutionsPage() {
   return (
     <PageShell>
       <Masthead
-        kicker={
+        title="Institutions"
+        lead="Labs and universities behind the papers in the corpus, ranked by output."
+        meta={
           <>
-            <span>People</span>
             <Link href="/authors" className="op-link">
-              Authors →
+              Authors <Icon name="arrow-right" />
             </Link>
           </>
         }
-        title="Institutions"
-        lead="Labs and universities behind the papers in the corpus, ranked by output."
       />
 
       <Column>
         {error && <ErrorNote title="Institutions unavailable" message={error} />}
-        <ul className="op-archive-list">
+        <Ledger columns={["Papers", "Institution"]}>
           {(data?.institutions ?? []).map((i) => (
-            <li key={i.slug} data-reveal="fade" data-delay="auto">
-              <Link href={`/institution/${i.slug}`} className="op-row" data-size="s" data-cur="open">
-                <span className="op-row-main">
-                  <span>{i.name}</span>
-                  {i.country_code && <span className="op-row-sub">{i.country_code}</span>}
-                </span>
-                <span className="op-row-count">
-                  {i.paper_count} papers · {i.author_count} authors
-                </span>
-              </Link>
-            </li>
+            <LedgerRow
+              key={i.slug}
+              href={`/institution/${i.slug}`}
+              num={<LedgerNum value={i.paper_count} unit="papers" />}
+              title={i.name}
+              meta={
+                <>
+                  {i.country_code && <span>{i.country_code}</span>}
+                  <span className="tnum">{i.author_count} authors</span>
+                </>
+              }
+            />
           ))}
-        </ul>
+        </Ledger>
       </Column>
 
       <Rail>

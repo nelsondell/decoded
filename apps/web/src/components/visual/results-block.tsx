@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { Predict, Results } from "@/lib/visual-types";
+import { Icon } from "@/components/icons";
 
 /*
   Primeiro o palpite, depois o gráfico. Quem chuta antes lembra mais do
@@ -53,7 +54,10 @@ function Chart({ results }: { results: Results }) {
         ))}
       </ol>
       <details className="vz-source">
-        <summary>From the paper</summary>
+        <summary>
+          From the paper <Icon name="plus" className="vz-source-open" />
+          <Icon name="minus" className="vz-source-close" />
+        </summary>
         <blockquote>“{results.source_quote}”</blockquote>
       </details>
     </figure>

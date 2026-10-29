@@ -27,7 +27,7 @@ const dmMono = DM_Mono({
 });
 
 // Sem JS, nada fica escondido esperando uma animação de entrada
-const NO_SCRIPT_REVEAL = `[data-reveal]{opacity:1!important;clip-path:none!important;transform:none!important}[data-bar],[data-barx]{transform:none!important}[data-draw]{stroke-dashoffset:0!important}`;
+const NO_SCRIPT_REVEAL = `[data-reveal]{opacity:1!important;clip-path:none!important;transform:none!important}[data-bar],[data-barx]{transform:none!important}[data-draw]{stroke-dashoffset:0!important}.op-ledger-row::before{transform:none!important}.op-ledger-num{opacity:1!important;transform:none!important}`;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -79,7 +79,14 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${literata.variable} ${dmMono.variable}`}>
+      {/* Sempre claro: o fundo papel é a identidade. O tema escuro segue nos
+          tokens para um seletor futuro, mas não acompanha mais o sistema. */}
+      <html
+        lang="en"
+        data-theme="light"
+        style={{ colorScheme: "light" }}
+        className={`${literata.variable} ${dmMono.variable}`}
+      >
         <body>
           <noscript>
             <style>{NO_SCRIPT_REVEAL}</style>

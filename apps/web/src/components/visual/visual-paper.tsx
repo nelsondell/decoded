@@ -1,17 +1,15 @@
-import { PageSection, WhereItBreaks } from "@/components/page-shell";
-import { predictFromResults, type Stat, type Step, type VisualDecode } from "@/lib/visual-types";
+import { PageSection } from "@/components/page-shell";
+import type { Stat, Step, VisualDecode } from "@/lib/visual-types";
 
 import { FlowDiagram } from "./flow-diagram";
 import { Glyph } from "./glyphs";
-import { ResultsBlock } from "./results-block";
-import { SimLab } from "./sims";
-import { TermChips } from "./term-chips";
+import type { MemberTeaser } from "./members-gate";
 
 /*
   A página do paper no decode visual. Pouca prosa, na ordem em que se
-  entende: a frase e o número; os três passos; o método desenhado; o
-  palpite e os resultados; o laboratório. O resto (termos, analogia,
-  limites, versão longa) fica embaixo e curto.
+  entende: a frase e o número; os três passos; o método desenhado. Essa
+  parte é aberta e sai no HTML. Resultados, laboratório, termos e limites
+  são de quem tem conta e chegam pelo cliente (visual-locked.tsx).
 */
 
 export type VisualNavItem = { id: string; label: string };
@@ -39,18 +37,18 @@ function StatBlock({ stat }: { stat: Stat }) {
   const base = parseNum(stat.baseline_value);
   const bars = ours != null && base != null && ours > 0 && base > 0;
   const max = bars ? Math.max(ours, base) : 1;
+  const glued = stat.unit.match(/^([%×x])(?:\s+(.*))?$/);
+  const sign = glued?.[1] ?? "";
+  const rest = glued ? (glued[2] ?? "") : stat.unit;
 
   return (
     <div className="vz-stat" data-reveal="fade" data-delay="120">
       <p className="vz-stat-value tnum">
         {stat.value}
-        {stat.unit && (
-          // % e × colam no número; palavras (F1, pts, tokens) ganham um respiro
-          <span className="vz-stat-unit" data-word={/^[%×x]/.test(stat.unit) ? undefined : ""}>
-            {stat.unit}
-          </span>
-        )}
+        {sign && <span className="vz-stat-unit">{sign}</span>}
       </p>
+      {/* A mesma gramática do livro de achados: palavras descem para baixo do número */}
+      {rest && <p className="vz-stat-unit-line">{rest}</p>}
       <p className="vz-stat-label">{stat.label}</p>
       {bars && (
         <div className="vz-stat-bars" aria-hidden>
@@ -85,7 +83,8 @@ function Steps({ steps }: { steps: Step[] }) {
   );
 }
 
-export function VisualPaper({ v }: { v: VisualDecode }) {
+/** A parte aberta: a frase, o número e como funciona. */
+export function VisualOpen({ v }: { v: VisualDecode }) {
   return (
     <>
       <section id="tldr" className="op-section vz-lead">
@@ -99,59 +98,19 @@ export function VisualPaper({ v }: { v: VisualDecode }) {
         <Steps steps={v.steps} />
         {v.flow && <FlowDiagram flow={v.flow} />}
       </PageSection>
-
-      {(v.results || v.predict) && (
-        <PageSection id="results" label="What they found">
-          <ResultsBlock results={v.results} predict={v.predict ?? predictFromResults(v.results)} />
-        </PageSection>
-      )}
-
-      {v.sim.template !== "none" && (
-        <PageSection id="lab" label={v.sim.title} aside="try it">
-          <SimLab sim={v.sim} />
-        </PageSection>
-      )}
-
-      {(v.terms.length > 0 || v.analogy) && (
-        <PageSection id="terms" label="Terms" aside={v.terms.length ? `${v.terms.length} terms` : undefined}>
-          {v.terms.length > 0 && <TermChips terms={v.terms} />}
-          {v.analogy && (
-            <div className="vz-analogy" data-reveal="fade" data-delay="120">
-              <p className="op-prose m-0">{v.analogy.text}</p>
-              <WhereItBreaks className="mt-[calc(24*var(--px))]">{v.analogy.breaks}</WhereItBreaks>
-            </div>
-          )}
-        </PageSection>
-      )}
-
-      {v.limits.length > 0 && (
-        <PageSection id="limits" label="Limits">
-          <ul className="vz-limits" data-reveal="fade" data-delay="60">
-            {v.limits.map((l) => (
-              <li key={l}>
-                <Glyph name="warning" size={18} className="vz-limit-glyph" />
-                <span>{l}</span>
-              </li>
-            ))}
-          </ul>
-        </PageSection>
-      )}
-
-      {v.deep.length > 0 && (
-        <PageSection id="long" label="Long version" aside={`${v.deep.length} parts`}>
-          <details className="vz-deep" data-reveal="fade" data-delay="60">
-            <summary className="op-link">Read the long version</summary>
-            <div className="vz-deep-body">
-              {v.deep.map((part) => (
-                <div key={part.heading} className="vz-deep-part">
-                  <h3 className="op-h3">{part.heading}</h3>
-                  <p className="op-prose op-prose-2 m-0">{part.body}</p>
-                </div>
-              ))}
-            </div>
-          </details>
-        </PageSection>
-      )}
     </>
   );
+}
+
+/**
+ * O que a trava anuncia sem entregar: nomes e contagens, nunca valores.
+ * É só isso que vai para o HTML de quem não entrou.
+ */
+export function memberTeaser(v: VisualDecode): MemberTeaser {
+  return {
+    metric: v.results?.metric ?? null,
+    simTitle: v.sim.template !== "none" ? v.sim.title : null,
+    terms: v.terms.length,
+    limits: v.limits.length,
+  };
 }

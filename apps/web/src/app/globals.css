@@ -27,7 +27,8 @@
 
 :root {
   /* Escala fluida — 1px de design a 1512px de viewport */
-  --px: clamp(0.74px, calc(100vw / 1512), 1.28px);
+  /* Piso de 0.86px: no celular o tipo não cai abaixo de ~86% do desenho */
+  --px: clamp(0.86px, calc(100vw / 1512), 1.28px);
   --pad: 6.2vw;
   --cols: 16;
   --gap-scale: calc(24 / 90);
@@ -143,6 +144,13 @@
     --t-open: calc(74 * var(--px));
     --t-title: calc(38 * var(--px));
     --t-page: calc(56 * var(--px));
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --pad: 20px;
+    --t-mono: calc(13 * var(--px));
   }
 }
 

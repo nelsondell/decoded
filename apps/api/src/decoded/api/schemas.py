@@ -10,6 +10,21 @@ class AuthorOut(BaseModel):
     affiliation: str | None = None
 
 
+class CardStat(BaseModel):
+    """O número principal do decode visual, para a linha da lista."""
+
+    value: str
+    unit: str = ""
+    label: str = ""
+
+    @classmethod
+    def from_visual(cls, visual: dict | None) -> CardStat | None:
+        stat = (visual or {}).get("stat")
+        if not isinstance(stat, dict) or not str(stat.get("value") or "").strip():
+            return None
+        return cls(value=str(stat["value"]), unit=stat.get("unit") or "", label=stat.get("label") or "")
+
+
 class PaperCard(BaseModel):
     """Versão resumida — usada no feed."""
 
@@ -27,6 +42,10 @@ class PaperCard(BaseModel):
     hn_mentions: int
     is_decoded: bool
     decoded_sections: list[str] = Field(default_factory=list)
+    stat: CardStat | None = Field(
+        default=None,
+        description="Número principal do decode visual, quando houver",
+    )
 
 
 class PaperDetail(BaseModel):

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { LedgerRow } from "@/components/ledger";
 import { PaperCardSkeleton, PaperList } from "@/components/paper-card";
 import {
   Column,
@@ -14,6 +15,7 @@ import {
 } from "@/components/page-shell";
 import { RelativeTime } from "@/components/relative-time";
 import { useApi } from "@/lib/use-api";
+import { Icon } from "@/components/icons";
 
 interface SavedResponse {
   papers: Array<{
@@ -50,17 +52,17 @@ export default function LibraryPage() {
   return (
     <PageShell>
       <Masthead
-        kicker={<span>{me?.display_name ?? "Your shelf"}</span>}
         title="Library"
         lead="Papers you saved, with whatever layers have been decoded since."
         meta={
           me ? (
             <>
+              {me.display_name && <span>{me.display_name}</span>}
               <span>{me.plan} plan</span>
               <span className="tnum">{me.credits_remaining} credits</span>
               <span className="tnum">{me.saved_count} saved</span>
               <Link href="/settings" className="op-link">
-                Settings →
+                Settings <Icon name="arrow-right" />
               </Link>
             </>
           ) : undefined
@@ -82,25 +84,27 @@ export default function LibraryPage() {
         )}
 
         {data && data.papers.length > 0 && (
-          <ul className="op-entries">
+          <PaperList>
             {data.papers.map((p) => (
-              <li key={p.arxiv_id} data-reveal="fade" data-delay="auto">
-                <Link href={`/paper/${p.arxiv_id}`} className="op-entry" data-cur="read">
-                  <span className="op-entry-body">
-                    <span className="op-kicker op-label">
-                      <span>arXiv:{p.arxiv_id}</span>
-                      <RelativeTime iso={p.published_at} className="tnum" />
-                      {p.is_decoded && <span className="text-accent">Decoded</span>}
-                    </span>
-                    <span className="op-entry-title block">{p.title}</span>
-                    {p.one_sentence && (
-                      <span className="op-entry-dek block">{p.one_sentence}</span>
-                    )}
+              <LedgerRow
+                key={p.arxiv_id}
+                href={`/paper/${p.arxiv_id}`}
+                num={
+                  <span className="op-ledger-label" data-on={p.is_decoded ? "" : undefined}>
+                    {p.is_decoded ? "Decoded" : "Not decoded yet"}
                   </span>
-                </Link>
-              </li>
+                }
+                title={p.title}
+                hook={p.one_sentence}
+                meta={
+                  <>
+                    <RelativeTime iso={p.published_at} className="tnum" />
+                    <span>arXiv:{p.arxiv_id}</span>
+                  </>
+                }
+              />
             ))}
-          </ul>
+          </PaperList>
         )}
       </Column>
 

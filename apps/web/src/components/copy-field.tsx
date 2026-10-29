@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/icons";
 
 /** Campo de leitura com botão de copiar. Usado pela URL do feed do podcast. */
 export function CopyField({ value }: { value: string }) {
@@ -29,7 +30,7 @@ export function CopyField({ value }: { value: string }) {
         {value}
       </code>
       <button type="button" onClick={copy} className="op-link flex-none">
-        {copied ? "Copied ✓" : "Copy"}
+        {copied ? <>Copied <Icon name="check" /></> : "Copy"}
       </button>
     </div>
   );

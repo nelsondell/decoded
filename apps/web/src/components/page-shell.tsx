@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { RevealScope } from "@/components/offprint/offprint-motion";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/icons";
 
 /**
  * A gramática das páginas internas do Offprint.
@@ -51,7 +52,6 @@ function sizeFor(title: string): "l" | "m" | "s" {
 
 export function Masthead({
   back,
-  kicker,
   title,
   lead,
   meta,
@@ -59,7 +59,6 @@ export function Masthead({
   plate = false,
 }: {
   back?: { href: string; label: string };
-  kicker?: React.ReactNode;
   title: string;
   lead?: React.ReactNode;
   meta?: React.ReactNode;
@@ -77,13 +76,8 @@ export function Masthead({
             data-reveal="fade"
             data-delay="0"
           >
-            ← {back.label}
+            <Icon name="arrow-left" /> {back.label}
           </Link>
-        )}
-        {kicker && (
-          <div className="op-kicker op-label" data-reveal="fade" data-delay="60">
-            {kicker}
-          </div>
         )}
         <h1
           className="op-page-title"
@@ -296,12 +290,10 @@ export function EmptyNote({
 
 /** Página de aviso (404, link inválido): só o cabeçalho, com uma saída. */
 export function Notice({
-  kicker,
   title,
   body,
   action,
 }: {
-  kicker: string;
   title: string;
   body: React.ReactNode;
   action: { href: string; label: string };
@@ -309,12 +301,11 @@ export function Notice({
   return (
     <PageShell>
       <Masthead
-        kicker={<span>{kicker}</span>}
         title={title}
         lead={body}
         meta={
           <Link href={action.href} className="op-link">
-            {action.label}
+            <Icon name="arrow-left" /> {action.label}
           </Link>
         }
       />

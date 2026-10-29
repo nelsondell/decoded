@@ -17,9 +17,9 @@ export function DiagramModeView({ data }: { data: DiagramMode }) {
       const mermaid = (await import("mermaid")).default;
 
       if (!mermaidInitialized) {
-        // A paleta do Offprint, clara ou escura conforme o sistema. O
-        // Mermaid não lê variáveis CSS, então os valores vão em hex.
-        const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        // A paleta do Offprint, clara ou escura conforme o data-theme do
+        // <html>. O Mermaid não lê variáveis CSS, então os valores vão em hex.
+        const dark = document.documentElement.dataset.theme === "dark";
         mermaid.initialize({
           startOnLoad: false,
           theme: "base",

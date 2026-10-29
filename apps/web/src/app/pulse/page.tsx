@@ -14,6 +14,7 @@ import {
 } from "@/components/page-shell";
 import { api } from "@/lib/api";
 import { rethrowDuringRevalidation } from "@/lib/isr";
+import { Icon } from "@/components/icons";
 
 export const revalidate = 1800;
 
@@ -27,18 +28,20 @@ function Group({
   label,
   hint,
   topics,
+  figure = "momentum",
 }: {
   label: string;
   hint: string;
   topics: React.ComponentProps<typeof TopicCard>["topic"][];
+  figure?: "count" | "momentum";
 }) {
   if (topics.length === 0) return null;
 
   return (
     <PageSection label={<span className="text-accent">{label}</span>} aside={hint}>
-      <TopicList>
+      <TopicList figure={figure}>
         {topics.map((t) => (
-          <TopicCard key={t.slug} topic={t} showKeywords={false} />
+          <TopicCard key={t.slug} topic={t} showKeywords={false} figure={figure} />
         ))}
       </TopicList>
     </PageSection>
@@ -59,7 +62,6 @@ export default async function PulsePage() {
   return (
     <PageShell>
       <Masthead
-        kicker={<span>Topics, week over week</span>}
         title="Field Pulse"
         lead="Topics discovered from what researchers are actually publishing — not from a taxonomy someone wrote once. Recounted every week."
         meta={
@@ -97,11 +99,12 @@ export default async function PulsePage() {
               label="Largest"
               hint="most papers, any trend"
               topics={pulse.largest ?? []}
+              figure="count"
             />
 
             <div className="mt-[calc(56*var(--px))]">
               <Link href="/topics" className="op-link" data-cur="open">
-                All {pulse.total_topics} topics →
+                All {pulse.total_topics} topics <Icon name="arrow-right" />
               </Link>
             </div>
           </>

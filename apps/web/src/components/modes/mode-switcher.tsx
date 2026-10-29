@@ -23,6 +23,7 @@ import { DiagramModeView } from "./diagram-mode";
 import { MathModeView } from "./math-mode";
 import { AnalogyModeView, CodeModeView, StoryModeView } from "./other-modes";
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/icons";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "/api").replace(
   /\/+$/,
@@ -278,12 +279,12 @@ function ModePanel({
       <div className="mt-[calc(30*var(--px))]">
         {isSignedIn ? (
           <button type="button" onClick={onGenerate} className="op-link" data-cur="make">
-            Generate · 1 credit →
+            Generate · 1 credit <Icon name="arrow-right" />
           </button>
         ) : (
           <SignInButton mode="modal">
             <button type="button" className="op-link" data-cur="sign in">
-              Sign in to generate →
+              Sign in to generate <Icon name="arrow-right" />
             </button>
           </SignInButton>
         )}
