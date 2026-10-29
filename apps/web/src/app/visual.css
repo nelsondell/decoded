@@ -764,6 +764,10 @@
     stroke-linejoin: round;
   }
 
+  .vz-sc-label-plate {
+    fill: var(--v-100);
+  }
+
   .vz-sc-label {
     font-family: var(--font-display);
     font-weight: 400;

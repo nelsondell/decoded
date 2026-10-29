@@ -464,7 +464,10 @@ async def store(paper_id: int, arxiv_id: str, message, model: str, batch: bool, 
     async with async_session_factory() as session:
         repo = DecodedContentsRepository(session)
         sections = await repo.get_all_sections(paper_id, PROMPT_VERSION)
-        visual, walk = sections.get(run.SECTION), sections.get(wt.SECTION)
+        # O repositório devolve as linhas; o que interessa é o conteúdo delas
+        visual_row, walk_row = sections.get(run.SECTION), sections.get(wt.SECTION)
+        visual = dict(visual_row.content) if visual_row is not None else None
+        walk = dict(walk_row.content) if walk_row is not None else None
         if visual is None:
             return run.Outcome(arxiv_id, "invalid", cost, detail="sem decode visual")
         new_visual, new_walk, copy_warnings = merge_copy(visual, walk, out.copy_, source_text)
