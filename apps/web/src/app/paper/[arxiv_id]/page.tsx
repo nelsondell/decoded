@@ -24,6 +24,8 @@ import { PaperJsonLd } from "@/components/paper-json-ld";
 import { ModeSwitcher } from "@/components/modes/mode-switcher";
 import { SectionTracker } from "@/components/section-tracker";
 import { PodcastSection } from "@/components/podcast/podcast-section";
+import { VisualPaper, visualNav } from "@/components/visual/visual-paper";
+import { visualOf } from "@/lib/visual-types";
 
 export const revalidate = 3600;
 
@@ -38,7 +40,7 @@ export async function generateMetadata({
     const paper = await api.getPaper(arxiv_id);
     const decodedMap = paper.decoded ?? {};
     const one = decoded.oneSentence(decodedMap);
-    const description = one?.text ?? paper.abstract.slice(0, 155);
+    const description = one?.text ?? visualOf(decodedMap)?.hook ?? paper.abstract.slice(0, 155);
     const url = `/paper/${arxiv_id}`;
 
     return {
@@ -86,6 +88,8 @@ export default async function PaperPage({
   }
 
   const decodedMap = paper.decoded ?? {};
+  // Papers novos trazem a seção "visual"; os antigos, as seis em prosa
+  const visual = visualOf(decodedMap);
 
   const one = decoded.oneSentence(decodedMap);
   const sixty = decoded.sixtySecond(decodedMap);
@@ -100,19 +104,20 @@ export default async function PaperPage({
   const authors = paper.authors ?? [];
 
   const navItems: NavItem[] = [
-    one && { id: "tldr", label: "One sentence" },
-    sixty && { id: "sixty", label: "60 seconds" },
-    deep && { id: "deep", label: "Deep dive" },
-    figures?.items.length && { id: "figures", label: "Figures" },
-    analogies?.items.length && { id: "analogies", label: "Analogies" },
-    terms.length && { id: "vocabulary", label: "Vocabulary" },
+    ...(visual ? visualNav(visual) : []),
+    !visual && one && { id: "tldr", label: "One sentence" },
+    !visual && sixty && { id: "sixty", label: "60 seconds" },
+    !visual && deep && { id: "deep", label: "Deep dive" },
+    !visual && figures?.items.length && { id: "figures", label: "Figures" },
+    !visual && analogies?.items.length && { id: "analogies", label: "Analogies" },
+    !visual && terms.length && { id: "vocabulary", label: "Vocabulary" },
     { id: "modes", label: "Modes" },
     { id: "podcast", label: "Listen" },
   ].filter(Boolean) as NavItem[];
 
   return (
     <>
-      <PaperJsonLd paper={paper} oneSentence={one?.text ?? null} />
+      <PaperJsonLd paper={paper} oneSentence={one?.text ?? visual?.hook ?? null} />
       <SectionTracker
         arxivId={paper.arxiv_id}
         sectionIds={navItems.map((n) => n.id)}
@@ -178,7 +183,9 @@ export default async function PaperPage({
             </PageSection>
           )}
 
-          {one && (
+          {visual && <VisualPaper v={visual} />}
+
+          {!visual && one && (
             <Section id="tldr" label="One sentence">
               <OneSentenceBlock data={one} />
             </Section>
@@ -186,31 +193,31 @@ export default async function PaperPage({
 
           <PodcastSection arxivId={paper.arxiv_id} />
 
-          {sixty && (
+          {!visual && sixty && (
             <Section id="sixty" label="60-second read" aside="three parts">
               <SixtySecondBlock data={sixty} terms={terms} />
             </Section>
           )}
 
-          {deep && (
+          {!visual && deep && (
             <Section id="deep" label="Deep dive" aside="five sections">
               <DeepDiveBlock data={deep} terms={terms} />
             </Section>
           )}
 
-          {figures && figures.items.length > 0 && (
+          {!visual && figures && figures.items.length > 0 && (
             <Section id="figures" label="Figures explained" aside={`${figures.items.length} fig.`}>
               <FiguresBlock data={figures} />
             </Section>
           )}
 
-          {analogies && analogies.items.length > 0 && (
+          {!visual && analogies && analogies.items.length > 0 && (
             <Section id="analogies" label="Analogies">
               <AnalogiesBlock data={analogies} />
             </Section>
           )}
 
-          {vocab && vocab.terms.length > 0 && (
+          {!visual && vocab && vocab.terms.length > 0 && (
             <Section id="vocabulary" label="Vocabulary" aside={`${vocab.terms.length} terms`}>
               <VocabularyBlock data={vocab} />
             </Section>

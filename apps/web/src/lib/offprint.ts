@@ -13,6 +13,7 @@ import {
   decoded as sections,
   type DecodedMap,
 } from "@/lib/decoded-types";
+import { visualOf, visualWords } from "@/lib/visual-types";
 
 export const OFFPRINTS_PER_ISSUE = 6;
 
@@ -111,8 +112,9 @@ function decodedWords(map: DecodedMap): {
     : [];
   const deepWords = bySection.reduce((a, b) => a + b, 0);
 
+  const visual = visualOf(map);
   const rest =
-    words(one?.text) +
+    (visual ? visualWords(visual) : words(one?.text)) +
     (figures?.items ?? []).reduce(
       (a, f) => a + words(f.plain_language) + words(f.key_insight),
       0,
@@ -349,6 +351,40 @@ function layerRows(map: DecodedMap): RowsFigure | null {
   };
 }
 
+/**
+ * Os resultados do próprio paper: o método dele contra os três melhores
+ * rivais. Benchmark ou levantamento não tem método próprio; aí o líder
+ * vai em destaque.
+ */
+function resultsRows(map: DecodedMap): RowsFigure | null {
+  const results = visualOf(map)?.results;
+  if (!results || results.rows.some((r) => r.value < 0)) return null;
+
+  const better = (a: number, b: number) => (results.higher_is_better ? b - a : a - b);
+  const ranked = [...results.rows].sort((a, b) => better(a.value, b.value));
+  const lead = results.rows.find((r) => r.ours) ?? ranked[0];
+  const picked = [lead, ...ranked.filter((r) => r !== lead).slice(0, 3)].sort((a, b) => better(a.value, b.value));
+  if (picked.length < 2) return null;
+
+  const max = niceCeil(Math.max(...picked.map((r) => r.value)));
+  const suffix = results.unit === "%" ? "%" : "";
+  const show = (v: number) => `${Math.round(v * 100) / 100}${suffix}`;
+
+  return {
+    type: "rows",
+    rows: picked.map((r) => ({
+      label: r.label.toUpperCase(),
+      value: r.value,
+      display: show(r.value),
+      highlight: r === lead,
+    })),
+    max,
+    axis: ["0", `${max}${suffix} ${results.metric}`.toUpperCase()],
+    caption: [`fig. ${results.metric.toLowerCase()}`, results.caption],
+    label: `${results.caption}: ${picked.map((r) => `${r.label} ${show(r.value)}`).join(", ")}`,
+  };
+}
+
 function argumentCurve(map: DecodedMap): CurveFigure | null {
   const { bySection } = decodedWords(map);
   const top = Math.max(...bySection, 0);
@@ -402,14 +438,17 @@ function figureFor(
   const map = (detail?.decoded ?? {}) as DecodedMap;
   const isDecoded = Object.keys(map).length > 0;
 
-  const candidate =
-    kind === "rows"
+  // Os números do próprio paper ocupam as pranchas de barras quando existem
+  const own = isDecoded && (kind === "rows" || kind === "columns") ? resultsRows(map) : null;
+
+  const candidate = own ??
+    (kind === "rows"
       ? (isDecoded ? layerRows(map) : null) ?? signalRows(pool, paper, metric)
       : kind === "curve"
         ? (isDecoded ? argumentCurve(map) : null) ?? signalCurve(pool, paper, metric)
         : kind === "threshold"
           ? (isDecoded ? argumentThreshold(map) : null) ?? signalThreshold(pool, metric)
-          : null;
+          : null);
 
   return candidate ?? signalColumns(pool, paper, metric);
 }
@@ -420,7 +459,7 @@ function figureFor(
 export function paperFigure(detail: PaperDetail): FigureSpec | null {
   const map = (detail.decoded ?? {}) as DecodedMap;
   if (Object.keys(map).length === 0) return null;
-  return argumentCurve(map) ?? layerRows(map);
+  return resultsRows(map) ?? argumentCurve(map) ?? layerRows(map);
 }
 
 /** Minutos de leitura: todas as camadas do decode, ou o abstract. */
