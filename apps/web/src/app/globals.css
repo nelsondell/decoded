@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "./offprint.css";
 @import "./op-pages.css";
+@import "./visual.css";
 
 @custom-variant dark {
   @media (prefers-color-scheme: dark) {
