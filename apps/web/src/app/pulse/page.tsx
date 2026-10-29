@@ -103,7 +103,7 @@ export default async function PulsePage() {
             />
 
             <div className="mt-[calc(56*var(--px))]">
-              <Link href="/topics" className="op-link" data-cur="open">
+              <Link href="/topics" className="op-link">
                 All {pulse.total_topics} topics <Icon name="arrow-right" />
               </Link>
             </div>

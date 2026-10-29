@@ -1,9 +1,10 @@
 import { PageSection } from "@/components/page-shell";
-import type { Stat, Step, VisualDecode, Walkthrough as WalkthroughData } from "@/lib/visual-types";
+import type { Scene, Stat, Step, VisualDecode, Walkthrough as WalkthroughData } from "@/lib/visual-types";
 
 import { FlowDiagram } from "./flow-diagram";
 import { Glyph } from "./glyphs";
 import type { MemberTeaser } from "./members-gate";
+import { PaperScene } from "./paper-scene";
 import { Walkthrough } from "./walkthrough";
 
 /*
@@ -15,9 +16,10 @@ import { Walkthrough } from "./walkthrough";
 
 export type VisualNavItem = { id: string; label: string };
 
-export function visualNav(v: VisualDecode): VisualNavItem[] {
+export function visualNav(v: VisualDecode, scene = false): VisualNavItem[] {
   return [
     { id: "tldr", label: "In one line" },
+    ...(scene ? [{ id: "scene", label: "What changes" }] : []),
     { id: "how", label: "How it works" },
     ...(v.results || v.predict ? [{ id: "results", label: "Results" }] : []),
     ...(v.sim.template !== "none" ? [{ id: "lab", label: "Try it" }] : []),
@@ -88,7 +90,15 @@ function Steps({ steps }: { steps: Step[] }) {
  * A parte aberta: a frase, o número e como funciona. Com passo a passo,
  * o "como funciona" é o diagrama interativo; sem, os três passos e o fluxo.
  */
-export function VisualOpen({ v, walkthrough }: { v: VisualDecode; walkthrough?: WalkthroughData }) {
+export function VisualOpen({
+  v,
+  walkthrough,
+  scene,
+}: {
+  v: VisualDecode;
+  walkthrough?: WalkthroughData;
+  scene?: Scene;
+}) {
   return (
     <>
       <section id="tldr" className="op-section vz-lead">
@@ -97,6 +107,12 @@ export function VisualOpen({ v, walkthrough }: { v: VisualDecode; walkthrough?: 
         </p>
         {v.stat && <StatBlock stat={v.stat} />}
       </section>
+
+      {scene && (
+        <PageSection id="scene" label="What changes">
+          <PaperScene scene={scene} />
+        </PageSection>
+      )}
 
       {walkthrough ? (
         <PageSection id="how" label="How it works" aside={`${walkthrough.stages.length} steps`}>

@@ -545,7 +545,6 @@ export function SimLab({ sim }: { sim: Sim }) {
           value={x}
           onChange={(e) => setX(Number(e.target.value))}
           className="vz-slider"
-          data-cur="drag"
         />
         {sim.paper_x != null && sim.paper_note && (
           <button type="button" className="op-link vz-preset" onClick={() => setX(clamp(sim.paper_x!, lo, hi))}>

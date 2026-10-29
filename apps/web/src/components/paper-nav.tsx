@@ -54,7 +54,7 @@ export function PaperNav({ items }: { items: NavItem[] }) {
             <a
               href={`#${item.id}`}
               aria-current={active === item.id ? "true" : undefined}
-              className={`flex items-baseline gap-[calc(14*var(--px))] font-mono text-[length:var(--t-mono)] font-light tracking-[0.06em] ${
+              className={`flex items-baseline gap-[calc(14*var(--px))] font-mono text-[length:var(--t-mono)] font-normal tracking-[0.06em] ${
                 active === item.id ? "text-accent" : "text-muted-foreground"
               }`}
             >

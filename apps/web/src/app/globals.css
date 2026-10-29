@@ -28,8 +28,9 @@
 :root {
   /* Escala fluida — 1px de design a 1512px de viewport */
   /* Piso de 0.86px: no celular o tipo não cai abaixo de ~86% do desenho */
-  --px: clamp(0.86px, calc(100vw / 1512), 1.28px);
-  --pad: 6.2vw;
+  --px: clamp(0.86px, calc(100vw / 1512), 1px);
+  /* Em telas largas o conteúdo para em 1400px e o resto vira margem */
+  --pad: max(6.2vw, calc((100vw - 1400px) / 2));
   --cols: 16;
   --gap-scale: calc(24 / 90);
   --gap: calc(
@@ -44,7 +45,7 @@
   --v-200: #dcd8cb;
   --ink: #171a16;
   --ink-2: #4e534b;
-  --ink-3: #7c8179;
+  --ink-3: #696e66;
   --moss: #3d5233;
 
   /* Faces — variáveis do next/font ficam no <html> */
@@ -61,8 +62,8 @@
   /* Movimento */
   --d-fast: 0.28s;
   --d-base: 0.5s;
-  --d-slow: 0.75s;
-  --d-page: 0.9s;
+  --d-slow: 0.45s;
+  --d-page: 0.6s;
   --expo: cubic-bezier(0.19, 1, 0.22, 1);
   --glide: cubic-bezier(0.215, 0.61, 0.355, 1);
   --svh: 1vh;
@@ -200,7 +201,7 @@
     background: var(--v-50);
     color: var(--ink);
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-body);
     line-height: 1.62;
     -webkit-font-smoothing: antialiased;

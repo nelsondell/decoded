@@ -142,6 +142,47 @@ export interface Walkthrough {
   stages: WalkthroughStage[];
 }
 
+/** A cena antes × depois — espelha decoded/visual/scene.py ("scene/1"). */
+export interface SceneActor {
+  id: string;
+  icon: string;
+  label: string;
+  col: number;
+  row: number;
+}
+
+export interface SceneBeat {
+  t: number;
+  kind: "move" | "say" | "path" | "mark" | "dim" | "fill";
+  actor: string;
+  col: number;
+  row: number;
+  text: string;
+  points: string;
+  shape: "straight" | "smooth";
+  amount: number;
+  mark: "ok" | "fail" | "wait" | "fast" | "";
+  tone: "good" | "bad" | "neutral";
+}
+
+export interface ScenePanel {
+  label: string;
+  beats: SceneBeat[];
+  outcome: string;
+}
+
+export interface Scene {
+  setting: "road" | "desk" | "grid" | "plain";
+  actors: SceneActor[];
+  before: ScenePanel;
+  after: ScenePanel;
+}
+
+export function sceneOf(map: DecodedMap): Scene | undefined {
+  const s = map.scene as Scene | undefined;
+  return s && Array.isArray(s.actors) && s.before && s.after ? s : undefined;
+}
+
 export function walkthroughOf(map: DecodedMap): Walkthrough | undefined {
   const w = map.walkthrough as Walkthrough | undefined;
   return w && Array.isArray(w.stages) && w.stages.length > 0 && Array.isArray(w.nodes) ? w : undefined;

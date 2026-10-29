@@ -84,7 +84,7 @@ export default async function InstitutionPage({
             <ul className="op-archive-list">
               {topics.map((t) => (
                 <li key={t.slug} data-reveal="fade" data-delay="auto">
-                  <Link href={`/topic/${t.slug}`} className="op-row" data-size="xs" data-cur="open">
+                  <Link href={`/topic/${t.slug}`} className="op-row" data-size="xs">
                     <span>{t.name}</span>
                     <span className="op-row-count">{t.paper_count}</span>
                   </Link>
@@ -99,7 +99,7 @@ export default async function InstitutionPage({
             <ul className="op-archive-list">
               {authors.map((a) => (
                 <li key={a.slug} data-reveal="fade" data-delay="auto">
-                  <Link href={`/author/${a.slug}`} className="op-row" data-size="xs" data-cur="open">
+                  <Link href={`/author/${a.slug}`} className="op-row" data-size="xs">
                     <span>{a.name}</span>
                     <span className="op-row-count">{a.paper_count} papers</span>
                   </Link>

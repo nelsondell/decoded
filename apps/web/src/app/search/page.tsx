@@ -58,7 +58,7 @@ export default async function SearchPage({
 
       <Rail>
         <RailHeading>What is searched</RailHeading>
-        <RailBlock className="flex flex-col gap-2.5 font-mono text-[length:var(--t-mono)] font-light text-muted-foreground">
+        <RailBlock className="flex flex-col gap-2.5 font-mono text-[length:var(--t-mono)] font-normal text-muted-foreground">
           {SEARCHED.map((item) => (
             <span key={item}>{item}</span>
           ))}

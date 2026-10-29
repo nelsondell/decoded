@@ -139,7 +139,7 @@ export function AnalogyModeView({ data }: { data: AnalogyMode }) {
                     key={j}
                     className="grid gap-1 border-t border-border py-[calc(12*var(--px))] sm:grid-cols-2 sm:gap-[calc(24*var(--px))]"
                   >
-                    <dt className="font-mono text-[length:calc(14*var(--px))] font-light text-muted-foreground">
+                    <dt className="font-mono text-[length:calc(14*var(--px))] font-normal text-muted-foreground">
                       {from.trim()}
                     </dt>
                     <dd className="m-0 text-[length:calc(17*var(--px))]">

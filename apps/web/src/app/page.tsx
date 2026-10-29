@@ -138,7 +138,7 @@ export default async function HomePage() {
             <ul className="op-archive-list op-home-shelves">
               {home.shelves.map((s) => (
                 <li key={s.href}>
-                  <Link href={s.href} className="op-row" data-size="xs" data-cur="open">
+                  <Link href={s.href} className="op-row" data-size="xs">
                     <span className="op-row-main">{s.label}</span>
                     <span className="op-row-count tnum">{s.count.toLocaleString("en-US")}</span>
                   </Link>

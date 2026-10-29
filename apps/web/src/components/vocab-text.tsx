@@ -36,7 +36,6 @@ export function VocabText({
               nativeButton={false}
               render={<span />}
               className="cursor-help border-b border-accent-light transition-colors hover:border-accent hover:text-accent"
-              data-cur="define"
               onClick={() => capture(EVENTS.VOCAB_TERM_OPENED, { term: term.term })}
             >
               {seg.text}
@@ -49,7 +48,7 @@ export function VocabText({
               <p className="op-label m-0 text-accent">
                 {term.term}
               </p>
-              <p className="mb-0 mt-[calc(10*var(--px))] font-serif text-[length:calc(17*var(--px))] font-light leading-[1.55] text-foreground">
+              <p className="mb-0 mt-[calc(10*var(--px))] font-serif text-[length:calc(17*var(--px))] font-normal leading-[1.55] text-foreground">
                 {term.definition}
               </p>
             </PopoverContent>

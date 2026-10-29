@@ -74,7 +74,7 @@ export function DiagramModeView({ data }: { data: DiagramMode }) {
           {error && (
             <div>
               <p className="op-label m-0 text-destructive">Diagram failed to render</p>
-              <pre className="mt-3 overflow-x-auto font-mono text-[length:calc(13*var(--px))] font-light leading-[1.7] text-muted-foreground">
+              <pre className="mt-3 overflow-x-auto font-mono text-[length:calc(13*var(--px))] font-normal leading-[1.7] text-muted-foreground">
                 {data.mermaid}
               </pre>
             </div>

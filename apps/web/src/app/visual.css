@@ -28,7 +28,7 @@
   .vz-stat-value {
     margin: 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(96 * var(--px));
     line-height: 0.95;
     letter-spacing: -0.04em;
@@ -44,7 +44,7 @@
   .vz-stat-unit-line {
     margin: calc(8 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(24 * var(--px));
     line-height: 1.2;
     color: var(--moss);
@@ -53,7 +53,7 @@
   .vz-stat-label {
     margin: calc(10 * var(--px)) 0 0;
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(13 * var(--px));
     letter-spacing: 0.06em;
     color: var(--ink-2);
@@ -86,7 +86,7 @@
     display: block;
     padding: 0 calc(8 * var(--px));
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(11 * var(--px));
     line-height: calc(22 * var(--px));
     color: var(--ink);
@@ -99,7 +99,7 @@
   .vz-stat-context {
     margin: calc(14 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(17 * var(--px));
     line-height: 1.45;
     color: var(--ink-2);
@@ -152,7 +152,7 @@
   .vz-step-text {
     margin: calc(8 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(17 * var(--px));
     line-height: 1.5;
     color: var(--ink-2);
@@ -213,7 +213,7 @@
   .vz-svg-label,
   .vz-svg-value {
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: 10px;
     letter-spacing: 0.06em;
     fill: var(--ink-3);
@@ -244,7 +244,7 @@
   .vz-predict-q {
     margin: 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(26 * var(--px));
     line-height: 1.3;
     color: var(--ink);
@@ -262,7 +262,7 @@
     border: 1px solid var(--v-200);
     background: transparent;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(17 * var(--px));
     color: var(--ink);
     cursor: pointer;
@@ -306,7 +306,7 @@
   .vz-reveal {
     margin: calc(18 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(18 * var(--px));
     line-height: 1.5;
     color: var(--ink-2);
@@ -335,7 +335,7 @@
 
   .vz-chart-title {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(26 * var(--px));
     line-height: 1.25;
     letter-spacing: -0.01em;
@@ -345,7 +345,7 @@
   .vz-chart-sub {
     margin: calc(8 * var(--px)) 0 0;
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(12 * var(--px));
     letter-spacing: 0.04em;
     color: var(--ink-3);
@@ -368,7 +368,7 @@
 
   .vz-bar-label {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(16 * var(--px));
     line-height: 1.25;
     color: var(--ink-2);
@@ -397,7 +397,7 @@
 
   .vz-bar-value {
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(13 * var(--px));
     text-align: right;
     color: var(--ink-2);
@@ -414,7 +414,7 @@
   .vz-source summary {
     display: inline-block;
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(12 * var(--px));
     letter-spacing: 0.04em;
     color: var(--ink-3);
@@ -441,7 +441,7 @@
     padding-left: calc(16 * var(--px));
     border-left: 1px solid var(--v-200);
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-style: italic;
     font-size: calc(16 * var(--px));
     line-height: 1.5;
@@ -454,7 +454,7 @@
     margin: 0;
     max-width: 46ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(22 * var(--px));
     line-height: 1.35;
     color: var(--ink);
@@ -493,7 +493,7 @@
     align-items: baseline;
     min-width: calc(180 * var(--px));
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(12 * var(--px));
     letter-spacing: 0.06em;
     color: var(--ink-3);
@@ -553,7 +553,7 @@
 
   .vz-readout dt {
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(11 * var(--px));
     letter-spacing: 0.06em;
     color: var(--ink-3);
@@ -562,7 +562,7 @@
   .vz-readout dd {
     margin: calc(4 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(28 * var(--px));
     line-height: 1.1;
     color: var(--ink);
@@ -586,7 +586,7 @@
 
   .vz-takeaway > span:first-child {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(18 * var(--px));
     line-height: 1.5;
     color: var(--ink-2);
@@ -594,7 +594,7 @@
 
   .vz-toy {
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(11 * var(--px));
     letter-spacing: 0.06em;
     color: var(--ink-3);
@@ -613,7 +613,7 @@
     border: 1px solid var(--v-200);
     background: transparent;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(16 * var(--px));
     color: var(--ink-2);
     cursor: pointer;
@@ -637,7 +637,7 @@
     min-height: 3.1em;
     margin: calc(18 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(19 * var(--px));
     line-height: 1.55;
     color: var(--ink);
@@ -668,7 +668,7 @@
     align-items: baseline;
     max-width: 60ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(18 * var(--px));
     line-height: 1.5;
     color: var(--ink-2);
@@ -679,6 +679,211 @@
     height: calc(18 * var(--px));
     color: var(--ink-3);
     transform: translateY(calc(3 * var(--px)));
+  }
+
+  /* ---------- Cena antes × depois ---------- */
+
+  .vz-sc-panels {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: calc(20 * var(--px));
+  }
+
+  .vz-sc-panel {
+    margin: 0;
+    padding: calc(14 * var(--px)) calc(16 * var(--px)) calc(16 * var(--px));
+    background: var(--v-100);
+  }
+
+  .vz-sc-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: calc(4 * var(--px)) calc(12 * var(--px));
+  }
+
+  .vz-sc-side {
+    font-family: var(--font-data);
+    font-weight: 400;
+    font-size: var(--t-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .vz-sc-panel[data-side="after"] .vz-sc-side {
+    color: var(--moss);
+  }
+
+  .vz-sc-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: calc(17 * var(--px));
+    color: var(--ink);
+  }
+
+  .vz-sc-stage {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: calc(10 * var(--px));
+    overflow: visible;
+  }
+
+  .vz-sc-ground path {
+    fill: none;
+    stroke: var(--v-200);
+    stroke-width: 1;
+  }
+
+  .vz-sc-road {
+    fill: color-mix(in oklab, var(--ink) 5%, transparent);
+  }
+
+  .vz-sc-ground .vz-sc-lane {
+    stroke-dasharray: 10 8;
+  }
+
+  .vz-sc-dot {
+    fill: var(--v-200);
+  }
+
+  .vz-sc-actor {
+    transition: opacity var(--d-base) var(--expo);
+  }
+
+  .vz-sc-actor[data-dim] {
+    opacity: 0.28;
+  }
+
+  .vz-sc-icon {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .vz-sc-label {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 10.5px;
+    fill: var(--ink-2);
+    paint-order: stroke;
+    stroke: var(--v-100);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
+
+  /* Quem está falando na faixa de cima ganha o nome em tinta */
+  .vz-sc-actor[data-talking] .vz-sc-label {
+    fill: var(--ink);
+    font-weight: 500;
+  }
+
+  .vz-sc-path {
+    fill: none;
+    stroke: var(--ink-3);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+  }
+
+  .vz-sc-path[data-tone="good"] {
+    stroke: var(--moss);
+  }
+
+  .vz-sc-path[data-tone="bad"] {
+    stroke: var(--destructive);
+  }
+
+  .vz-sc-fill-track {
+    fill: var(--v-200);
+  }
+
+  .vz-sc-fill-bar {
+    fill: var(--ink-3);
+  }
+
+  .vz-sc-fill[data-tone="good"] .vz-sc-fill-bar {
+    fill: var(--moss);
+  }
+
+  .vz-sc-fill[data-tone="bad"] .vz-sc-fill-bar {
+    fill: var(--destructive);
+  }
+
+  .vz-sc-fill-label {
+    font-family: var(--font-data);
+    font-weight: 400;
+    font-size: 9px;
+    fill: var(--ink-3);
+  }
+
+  .vz-sc-mark circle {
+    fill: var(--moss);
+  }
+
+  .vz-sc-mark[data-mark="fail"] circle {
+    fill: var(--destructive);
+  }
+
+  .vz-sc-mark[data-mark="wait"] circle {
+    fill: var(--ink-3);
+  }
+
+  .vz-sc-mark path,
+  .vz-sc-mark circle + g * {
+    fill: none;
+    stroke: var(--v-50);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .vz-sc-say rect {
+    fill: var(--v-50);
+    stroke: var(--v-200);
+    stroke-width: 1;
+  }
+
+  .vz-sc-say[data-tone="good"] rect {
+    stroke: var(--moss);
+  }
+
+  .vz-sc-say[data-tone="bad"] rect {
+    stroke: var(--destructive);
+  }
+
+  .vz-sc-say text {
+    font-family: var(--font-data);
+    font-weight: 400;
+    font-size: 9px;
+    fill: var(--ink);
+  }
+
+  .vz-sc-outcome {
+    margin: calc(10 * var(--px)) 0 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: calc(16 * var(--px));
+    line-height: 1.45;
+    color: var(--ink-2);
+    opacity: 0;
+    transition: opacity var(--d-base) var(--expo);
+  }
+
+  .vz-sc-outcome[data-shown] {
+    opacity: 1;
+  }
+
+  .vz-sc-panel[data-side="after"] .vz-sc-outcome {
+    color: var(--moss);
+  }
+
+  .vz-sc-replay {
+    margin-top: calc(14 * var(--px));
   }
 
   /* ---------- Passo a passo do método ---------- */
@@ -709,7 +914,7 @@
 
   .vz-wt-source {
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -724,7 +929,7 @@
     margin: calc(10 * var(--px)) 0 0;
     max-width: 62ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(19 * var(--px));
     line-height: 1.5;
     color: var(--ink);
@@ -746,7 +951,7 @@
 
   .vz-wt-count {
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -767,7 +972,7 @@
     margin: calc(10 * var(--px)) 0 0;
     max-width: 46ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(18 * var(--px));
     line-height: 1.55;
     color: var(--ink-2);
@@ -806,7 +1011,7 @@
   .vz-wt-ex-label {
     display: block;
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -817,7 +1022,7 @@
   .vz-wt-out p {
     margin: calc(8 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(17 * var(--px));
     line-height: 1.55;
     color: var(--ink);
@@ -867,7 +1072,7 @@
   .vz-wt-play {
     padding: 0 calc(14 * var(--px));
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -998,7 +1203,7 @@
 
   .vz-wt-edge-label {
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: 10.5px;
     letter-spacing: 0.04em;
     fill: var(--ink-3);
@@ -1048,7 +1253,7 @@
     max-width: 24ch;
     margin: 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(34 * var(--px));
     line-height: 1.2;
     letter-spacing: -0.015em;
@@ -1071,7 +1276,7 @@
     align-items: baseline;
     max-width: 56ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(18 * var(--px));
     line-height: 1.5;
     color: var(--ink-2);
@@ -1168,6 +1373,9 @@
   /* ---------- Coluna única ---------- */
 
   @media (max-width: 900px) {
+    .vz-sc-panels {
+      grid-template-columns: minmax(0, 1fr);
+    }
     .vz-wt-body {
       grid-template-columns: minmax(0, 1fr);
       gap: calc(28 * var(--px));
@@ -1214,6 +1422,18 @@
     .vz-svg-value,
     .vz-edge-label {
       font-size: 13px;
+    }
+  }
+
+  /* No celular a cena vai de borda a borda: o desenho fica em tamanho real */
+  @media (max-width: 640px) {
+    .vz-sc-panel {
+      margin-inline: calc(var(--pad) * -1);
+      padding: calc(12 * var(--px)) 8px calc(14 * var(--px));
+    }
+    .vz-sc-head,
+    .vz-sc-outcome {
+      padding-inline: calc(var(--pad) - 8px);
     }
   }
 }
