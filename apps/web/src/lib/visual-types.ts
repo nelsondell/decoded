@@ -122,6 +122,31 @@ export interface VisualDecode {
   deep: { heading: string; body: string }[];
 }
 
+/** O passo a passo do método — espelha decoded/visual/walkthrough.py ("walkthrough/1"). */
+export interface WalkthroughStage {
+  title: string;
+  says: string;
+  nodes: string[];
+  example: string;
+  example_format: "text" | "code" | "numbers";
+}
+
+export interface Walkthrough {
+  example_title: string;
+  example_source: string;
+  illustrative: boolean;
+  input: string;
+  output: string;
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+  stages: WalkthroughStage[];
+}
+
+export function walkthroughOf(map: DecodedMap): Walkthrough | undefined {
+  const w = map.walkthrough as Walkthrough | undefined;
+  return w && Array.isArray(w.stages) && w.stages.length > 0 && Array.isArray(w.nodes) ? w : undefined;
+}
+
 export function visualOf(map: DecodedMap): VisualDecode | undefined {
   const v = map.visual as VisualDecode | undefined;
   return v && typeof v.hook === "string" && Array.isArray(v.steps) ? v : undefined;

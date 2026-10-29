@@ -25,7 +25,7 @@ import { PaperJsonLd } from "@/components/paper-json-ld";
 import { SectionTracker } from "@/components/section-tracker";
 import { MembersGate } from "@/components/visual/members-gate";
 import { VisualOpen, memberTeaser, visualNav } from "@/components/visual/visual-paper";
-import { visualOf } from "@/lib/visual-types";
+import { visualOf, walkthroughOf } from "@/lib/visual-types";
 
 export const revalidate = 3600;
 
@@ -182,7 +182,7 @@ export default async function PaperPage({
             </PageSection>
           )}
 
-          {visual && <VisualOpen v={visual} />}
+          {visual && <VisualOpen v={visual} walkthrough={walkthroughOf(decodedMap)} />}
 
           {!visual && one && (
             <Section id="tldr" label="One sentence">

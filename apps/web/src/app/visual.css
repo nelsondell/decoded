@@ -681,6 +681,348 @@
     transform: translateY(calc(3 * var(--px)));
   }
 
+  /* ---------- Passo a passo do método ---------- */
+
+  .vz-wt {
+    display: grid;
+    gap: calc(28 * var(--px));
+  }
+
+  /* O exemplo que atravessa o método: a peça de amostra no topo */
+  .vz-wt-example {
+    margin: 0;
+    padding: calc(18 * var(--px)) calc(22 * var(--px)) calc(20 * var(--px));
+    background: var(--v-100);
+  }
+
+  .vz-wt-example-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: calc(6 * var(--px)) calc(18 * var(--px));
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: calc(17 * var(--px));
+    color: var(--ink);
+  }
+
+  .vz-wt-source {
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: var(--t-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--moss);
+  }
+
+  .vz-wt-source[data-illustrative] {
+    color: var(--ink-3);
+  }
+
+  .vz-wt-input {
+    margin: calc(10 * var(--px)) 0 0;
+    max-width: 62ch;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: calc(19 * var(--px));
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .vz-wt-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: calc(48 * var(--px));
+    align-items: start;
+  }
+
+  .vz-wt-panel {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    min-height: calc(420 * var(--px));
+  }
+
+  .vz-wt-count {
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: var(--t-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .vz-wt-title {
+    margin: calc(10 * var(--px)) 0 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: calc(28 * var(--px));
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+
+  .vz-wt-says {
+    margin: calc(10 * var(--px)) 0 0;
+    max-width: 46ch;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: calc(18 * var(--px));
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  /* Os blocos que trabalham nesta etapa, com o nome do diagrama */
+  .vz-wt-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(8 * var(--px));
+    margin: calc(16 * var(--px)) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .vz-wt-chips li {
+    padding: calc(4 * var(--px)) calc(10 * var(--px));
+    border: 1px solid var(--moss);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: calc(14 * var(--px));
+    color: var(--moss);
+  }
+
+  .vz-wt-ex,
+  .vz-wt-out {
+    margin-top: calc(18 * var(--px));
+    padding: calc(14 * var(--px)) calc(16 * var(--px));
+    background: var(--v-100);
+  }
+
+  .vz-wt-out {
+    background: var(--accent-soft);
+  }
+
+  .vz-wt-ex-label {
+    display: block;
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: var(--t-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .vz-wt-ex p,
+  .vz-wt-out p {
+    margin: calc(8 * var(--px)) 0 0;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: calc(17 * var(--px));
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  .vz-wt-ex[data-format="code"] p,
+  .vz-wt-ex[data-format="numbers"] p {
+    font-family: var(--font-data);
+    font-size: calc(14 * var(--px));
+    line-height: 1.65;
+  }
+
+  .vz-wt-ex[data-format="numbers"] p {
+    color: var(--moss);
+  }
+
+  /* Controles: anterior, a régua de etapas, próximo, play */
+  .vz-wt-controls {
+    display: flex;
+    align-items: center;
+    gap: calc(10 * var(--px));
+    margin-top: auto;
+    padding-top: calc(24 * var(--px));
+  }
+
+  .vz-wt-btn,
+  .vz-wt-play {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    height: calc(40 * var(--px));
+    border: 1px solid var(--v-200);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+      border-color var(--d-fast) var(--expo),
+      color var(--d-fast) var(--expo);
+  }
+
+  .vz-wt-btn {
+    width: calc(40 * var(--px));
+    font-size: calc(18 * var(--px));
+  }
+
+  .vz-wt-play {
+    padding: 0 calc(14 * var(--px));
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: var(--t-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .vz-wt-btn:disabled {
+    color: var(--ink-3);
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .vz-wt-btn:focus-visible,
+  .vz-wt-play:focus-visible,
+  .vz-wt-tick:focus-visible {
+    outline: 1px solid var(--moss);
+    outline-offset: 3px;
+  }
+
+  .vz-wt-ticks {
+    display: flex;
+    flex: 1;
+    gap: calc(4 * var(--px));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .vz-wt-ticks li {
+    flex: 1;
+  }
+
+  /* Alvo de 24px, traço de 3px no meio */
+  .vz-wt-tick {
+    display: block;
+    width: 100%;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: linear-gradient(var(--v-200), var(--v-200)) center / 100% 3px no-repeat;
+    cursor: pointer;
+    transition: background-size var(--d-fast) var(--expo);
+  }
+
+  .vz-wt-tick[data-state="done"] {
+    background-image: linear-gradient(var(--accent-light), var(--accent-light));
+  }
+
+  .vz-wt-tick[data-state="now"] {
+    background-image: linear-gradient(var(--moss), var(--moss));
+    background-size: 100% 5px;
+  }
+
+  /* O diagrama: blocos parados, a etapa acende */
+  .vz-wt-diagram {
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    overflow: visible;
+  }
+
+  .vz-wt-node rect {
+    fill: var(--v-50);
+    stroke: var(--v-200);
+    stroke-width: 1;
+    transition:
+      fill var(--d-base) var(--expo),
+      stroke var(--d-base) var(--expo);
+  }
+
+  .vz-wt-node[data-kind="input"] rect,
+  .vz-wt-node[data-kind="output"] rect {
+    stroke-dasharray: 4 3;
+  }
+
+  .vz-wt-node[data-kind="data"] rect {
+    fill: var(--v-100);
+  }
+
+  .vz-wt-node[data-kind="model"] rect {
+    stroke: var(--ink-3);
+  }
+
+  .vz-wt-node text {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 14px;
+    fill: var(--ink-2);
+    transition: fill var(--d-base) var(--expo);
+  }
+
+  .vz-wt-node[data-state="done"] rect {
+    stroke: var(--accent-light);
+  }
+
+  .vz-wt-node[data-state="done"] text {
+    fill: var(--ink);
+  }
+
+  .vz-wt-node[data-state="now"] rect {
+    fill: var(--accent-soft);
+    stroke: var(--moss);
+    stroke-width: 1.5;
+  }
+
+  .vz-wt-node[data-state="now"] text {
+    fill: var(--ink);
+  }
+
+  .vz-wt-edge path {
+    fill: none;
+    stroke: var(--v-200);
+    stroke-width: 1.2;
+    transition: stroke var(--d-base) var(--expo);
+  }
+
+  .vz-wt-edge[data-back] path {
+    stroke-dasharray: 4 3;
+  }
+
+  /* A seta que chega num bloco aceso corre como dado passando */
+  .vz-wt-edge[data-on] path {
+    stroke: var(--moss);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 5;
+    animation: vz-wt-flow 0.9s linear infinite;
+  }
+
+  .vz-wt-edge-label {
+    font-family: var(--font-data);
+    font-weight: 300;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    fill: var(--ink-3);
+    /* Halo da cor do papel: nenhuma linha passa por cima do texto */
+    paint-order: stroke;
+    stroke: var(--v-50);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+  }
+
+  .vz-wt-edge[data-side]:not([data-on]) .vz-wt-edge-label {
+    display: none;
+  }
+
+  .vz-wt-edge[data-on] .vz-wt-edge-label {
+    fill: var(--moss);
+  }
+
+  @keyframes vz-wt-flow {
+    to {
+      stroke-dashoffset: -11;
+    }
+  }
+
   /* ---------- A trava: o resto do paper para quem tem conta ---------- */
 
   .vz-gate {
@@ -810,6 +1152,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .vz-wt-edge[data-on] path {
+      animation: none;
+      stroke-dasharray: none;
+    }
     .vz-node,
     .vz-edge,
     .vz-stat-fill,
@@ -822,6 +1168,16 @@
   /* ---------- Coluna única ---------- */
 
   @media (max-width: 900px) {
+    .vz-wt-body {
+      grid-template-columns: minmax(0, 1fr);
+      gap: calc(28 * var(--px));
+    }
+    .vz-wt-panel {
+      min-height: 0;
+    }
+    .vz-wt-diagram {
+      max-width: 420px;
+    }
     .vz-lead {
       grid-template-columns: minmax(0, 1fr);
       gap: calc(36 * var(--px));
