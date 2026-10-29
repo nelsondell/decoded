@@ -62,7 +62,7 @@
   .op-page-title {
     margin: calc(22 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-page);
     line-height: 1.06;
     letter-spacing: -0.03em;
@@ -88,7 +88,7 @@
     margin: calc(28 * var(--px)) 0 0;
     max-width: 52ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-body);
     line-height: 1.62;
     color: var(--ink-2);
@@ -128,7 +128,7 @@
   .op-rail-note {
     margin: calc(14 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(16 * var(--px));
     line-height: 1.55;
     color: var(--ink-2);
@@ -159,7 +159,7 @@
   .op-prose {
     max-width: 64ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-body);
     line-height: 1.62;
     color: var(--ink);
@@ -172,7 +172,7 @@
   .op-h3 {
     margin: 0;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(30 * var(--px));
     line-height: 1.2;
     letter-spacing: -0.018em;
@@ -183,7 +183,7 @@
     margin: 0;
     max-width: 30ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(34 * var(--px));
     line-height: 1.26;
     letter-spacing: -0.02em;
@@ -216,7 +216,7 @@
   .op-ledger-head {
     padding-bottom: calc(12 * var(--px));
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -263,7 +263,7 @@
 
   .op-ledger-value {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(44 * var(--px));
     line-height: 0.95;
     letter-spacing: -0.035em;
@@ -279,7 +279,7 @@
 
   .op-ledger-unit {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(16 * var(--px));
     line-height: 1.25;
     color: var(--moss);
@@ -287,7 +287,7 @@
 
   .op-ledger-label {
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(12 * var(--px));
     line-height: 1.45;
     letter-spacing: 0.04em;
@@ -309,7 +309,7 @@
   .op-ledger-title {
     max-width: 40ch;
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 500;
     font-size: calc(25 * var(--px));
     line-height: 1.25;
     letter-spacing: -0.012em;
@@ -322,7 +322,7 @@
     margin-top: calc(8 * var(--px));
     max-width: 62ch;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(18 * var(--px));
     line-height: 1.5;
     color: var(--ink-2);
@@ -335,7 +335,7 @@
     gap: calc(4 * var(--px)) calc(18 * var(--px));
     margin-top: calc(12 * var(--px));
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -391,7 +391,7 @@
   .op-row-sub {
     margin-top: calc(6 * var(--px));
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0;
     color: var(--ink-3);
@@ -440,7 +440,7 @@
   .op-stat-value {
     margin-top: calc(18 * var(--px));
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(64 * var(--px));
     line-height: 1;
     letter-spacing: -0.03em;
@@ -470,7 +470,7 @@
 
   .op-note-body {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(17 * var(--px));
     line-height: 1.55;
     color: var(--ink-2);
@@ -485,7 +485,7 @@
     border-bottom: 1px solid var(--v-200);
     background: none;
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -520,7 +520,7 @@
     gap: calc(12 * var(--px)) calc(30 * var(--px));
     border-bottom: 1px solid var(--v-200);
     font-family: var(--font-data);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--t-mono);
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -566,7 +566,7 @@
     outline: none;
     background: transparent;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(44 * var(--px));
     line-height: 1.2;
     letter-spacing: -0.02em;
@@ -651,7 +651,7 @@
     background: none;
     text-align: left;
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 400;
     font-size: calc(18 * var(--px));
     color: var(--ink);
     cursor: pointer;

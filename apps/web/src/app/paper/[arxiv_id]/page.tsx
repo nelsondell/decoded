@@ -25,7 +25,7 @@ import { PaperJsonLd } from "@/components/paper-json-ld";
 import { SectionTracker } from "@/components/section-tracker";
 import { MembersGate } from "@/components/visual/members-gate";
 import { VisualOpen, memberTeaser, visualNav } from "@/components/visual/visual-paper";
-import { visualOf, walkthroughOf } from "@/lib/visual-types";
+import { sceneOf, visualOf, walkthroughOf } from "@/lib/visual-types";
 
 export const revalidate = 3600;
 
@@ -105,7 +105,7 @@ export default async function PaperPage({
   const authors = paper.authors ?? [];
 
   const navItems: NavItem[] = [
-    ...(visual ? visualNav(visual) : []),
+    ...(visual ? visualNav(visual, !!sceneOf(decodedMap)) : []),
     !visual && one && { id: "tldr", label: "One sentence" },
     !visual && sixty && { id: "sixty", label: "60 seconds" },
     !visual && deep && { id: "deep", label: "Deep dive" },
@@ -182,7 +182,9 @@ export default async function PaperPage({
             </PageSection>
           )}
 
-          {visual && <VisualOpen v={visual} walkthrough={walkthroughOf(decodedMap)} />}
+          {visual && (
+            <VisualOpen v={visual} walkthrough={walkthroughOf(decodedMap)} scene={sceneOf(decodedMap)} />
+          )}
 
           {!visual && one && (
             <Section id="tldr" label="One sentence">

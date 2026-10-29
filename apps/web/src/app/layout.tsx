@@ -6,11 +6,10 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { PostHogProvider } from "@/components/posthog-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { CursorDot } from "@/components/offprint/cursor-dot";
 
-// Duas faces, duas funções. Literata leve carrega tudo que se lê como texto,
+// Duas faces, duas funções. Literata carrega tudo que se lê como texto,
 // do título de 128px ao corpo; o eixo óptico deixa a mesma família servir
-// aos dois. DM Mono leve marca o que é dado: IDs do arXiv, datas, rótulos.
+// aos dois. DM Mono marca o que é dado: IDs do arXiv, datas, rótulos.
 const literata = Literata({
   variable: "--font-literata",
   subsets: ["latin"],
@@ -98,7 +97,6 @@ export default function RootLayout({
                 <div className="flex-1">{children}</div>
                 <SiteFooter />
               </div>
-              <CursorDot />
             </Providers>
           </PostHogProvider>
         </body>

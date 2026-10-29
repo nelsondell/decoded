@@ -98,7 +98,6 @@ export function ResultsBlock({
                   data-state={state}
                   disabled={answered}
                   onClick={() => setPicked(i)}
-                  data-cur="pick"
                 >
                   {opt}
                 </button>

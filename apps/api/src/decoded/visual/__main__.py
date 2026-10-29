@@ -14,6 +14,11 @@ Linha de comando do decode visual. Rode de apps/api (lê o .env de lá):
     python -m decoded.visual wt-estimate --limit 130
     python -m decoded.visual wt-trial 2610.01234 --save
     python -m decoded.visual wt-submit --limit 130    # coletado pelo mesmo collect
+
+    Cena antes × depois e textos em tom de leitor:
+    python -m decoded.visual sc-estimate --limit 130
+    python -m decoded.visual sc-trial 2610.01234      # sem gravar
+    python -m decoded.visual sc-submit --limit 130    # coletado pelo mesmo collect
 """
 
 from __future__ import annotations
@@ -99,6 +104,18 @@ def main() -> None:
     s = sub.add_parser("collect"); s.add_argument("batch_id"); s.add_argument("--wait", action="store_true")
 
     from decoded.visual import walkthrough as wt
+    from decoded.visual import scene as sc
+    s = sub.add_parser("sc-estimate"); s.add_argument("--limit", type=int, default=130)
+    s.add_argument("--model", choices=MODELS, default=sc.DEFAULT_MODEL)
+    s.add_argument("--output-tokens", type=int, default=6000)
+    s = sub.add_parser("sc-trial"); s.add_argument("arxiv_id")
+    s.add_argument("--model", choices=MODELS, default=sc.DEFAULT_MODEL)
+    s.add_argument("--effort", default="medium", choices=["low", "medium", "high"])
+    s = sub.add_parser("sc-submit"); s.add_argument("--limit", type=int, default=130)
+    s.add_argument("--model", choices=MODELS, default=sc.DEFAULT_MODEL)
+    s.add_argument("--effort", default="medium", choices=["low", "medium", "high"])
+    s.add_argument("--only", nargs="*", help="arxiv ids específicos")
+
     s = sub.add_parser("wt-prepare"); s.add_argument("--limit", type=int, default=130)
     s = sub.add_parser("wt-estimate"); s.add_argument("--limit", type=int, default=130)
     s.add_argument("--model", choices=MODELS, default=wt.DEFAULT_MODEL)
@@ -133,6 +150,13 @@ def main() -> None:
         _print(asyncio.run(run.submit(a.limit, a.model, a.effort, _key(), a.only)))
     elif a.cmd == "collect":
         _print(asyncio.run(run.collect(a.batch_id, _key(), a.wait)))
+    elif a.cmd == "sc-estimate":
+        _print(sc.estimate(asyncio.run(sc.candidates(a.limit)), a.model, a.output_tokens))
+    elif a.cmd == "sc-trial":
+        outcome, preview = asyncio.run(sc.trial(a.arxiv_id, a.model, a.effort, _key()))
+        _print({"outcome": outcome.__dict__, "preview": preview})
+    elif a.cmd == "sc-submit":
+        _print(asyncio.run(sc.submit(a.limit, a.model, a.effort, _key(), a.only)))
     elif a.cmd == "wt-prepare":
         rows = asyncio.run(wt.candidates(a.limit))
         _print(asyncio.run(wt.fetch_pdfs([p.arxiv_id for p, _, _ in rows])))

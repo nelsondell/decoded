@@ -176,7 +176,7 @@ export function VocabularyBlock({ data }: { data: Vocabulary }) {
           key={i}
           className="grid gap-1.5 border-t border-border py-[calc(16*var(--px))] first:border-t-0 first:pt-0 sm:grid-cols-[calc(200*var(--px))_1fr] sm:gap-[calc(24*var(--px))]"
         >
-          <dt className="font-mono text-[length:calc(14*var(--px))] font-light text-accent">
+          <dt className="font-mono text-[length:calc(14*var(--px))] font-normal text-accent">
             {t.term}
           </dt>
           <dd className="op-prose op-prose-2 m-0 text-[length:calc(17*var(--px))]">

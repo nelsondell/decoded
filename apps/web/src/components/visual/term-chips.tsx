@@ -20,7 +20,6 @@ export function TermChips({ terms }: { terms: Term[] }) {
             aria-selected={i === open}
             className="vz-chip"
             onClick={() => setOpen(i)}
-            data-cur="open"
           >
             {t.term}
           </button>

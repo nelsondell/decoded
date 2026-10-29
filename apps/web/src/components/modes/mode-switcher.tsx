@@ -278,12 +278,12 @@ function ModePanel({
 
       <div className="mt-[calc(30*var(--px))]">
         {isSignedIn ? (
-          <button type="button" onClick={onGenerate} className="op-link" data-cur="make">
+          <button type="button" onClick={onGenerate} className="op-link">
             Generate · 1 credit <Icon name="arrow-right" />
           </button>
         ) : (
           <SignInButton mode="modal">
-            <button type="button" className="op-link" data-cur="sign in">
+            <button type="button" className="op-link">
               Sign in to generate <Icon name="arrow-right" />
             </button>
           </SignInButton>

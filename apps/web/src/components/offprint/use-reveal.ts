@@ -45,8 +45,9 @@ export function useReveal(root: RefObject<HTMLElement | null>) {
         const mine = topOf(el);
         return base + Math.max(0, tops.findIndex((x) => Math.abs(x - mine) < 4)) * step;
       }
-      if (el.dataset.delay === "auto") return Math.min(batchIndex, 8) * 60;
-      return parseInt(el.dataset.delay ?? "0", 10) || 0;
+      // Esperas curtas: quem rola a página não fica aguardando o texto aparecer
+      if (el.dataset.delay === "auto") return Math.min(batchIndex, 4) * 40;
+      return Math.min(parseInt(el.dataset.delay ?? "0", 10) || 0, 120);
     };
 
     const fire = (watch: Element, batchIndex: number) => {
@@ -67,7 +68,7 @@ export function useReveal(root: RefObject<HTMLElement | null>) {
               io?.unobserve(e.target);
             });
           },
-          { threshold: 0.15 },
+          { threshold: 0, rootMargin: "0px 0px 8% 0px" },
         )
       : null;
 

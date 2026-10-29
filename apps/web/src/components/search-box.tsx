@@ -79,7 +79,6 @@ export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
                   }}
                   className="op-row w-full border-0 bg-transparent text-left"
                   data-size="s"
-                  data-cur="ask"
                 >
                   <span>{ex}</span>
                   <span className="op-row-count">{String(i + 1).padStart(2, "0")}</span>

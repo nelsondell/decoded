@@ -362,11 +362,14 @@ async def collect(batch_id: str, api_key: str, wait: bool) -> dict:
             select(ParsedContent.paper_id, ParsedContent.markdown).where(ParsedContent.paper_id.in_(paper_ids))
         )).all())
 
-    # O mesmo coletor serve aos dois lotes: decode visual e passo a passo
+    # O mesmo coletor serve a todos os lotes: decode visual, passo a passo e cena
     storer = store
     if state.get("kind") == "walkthrough":
         from decoded.visual import walkthrough
         storer = walkthrough.store
+    elif state.get("kind") == "scene":
+        from decoded.visual import scene
+        storer = scene.store
 
     async def save(meta: dict, message) -> Outcome:
         # O pooler do Neon derruba conexões no meio da escrita; uma queda não perde o lote

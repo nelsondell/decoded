@@ -57,11 +57,11 @@ export function LedgerRow({
   return (
     <li className="op-ledger-row" data-reveal="rule" data-delay="auto">
       {external ? (
-        <a href={href} className="op-ledger-link" data-cur="read" onClick={onClick}>
+        <a href={href} className="op-ledger-link" onClick={onClick}>
           {body}
         </a>
       ) : (
-        <Link href={href} className="op-ledger-link" data-cur="read" onClick={onClick}>
+        <Link href={href} className="op-ledger-link" onClick={onClick}>
           {body}
         </Link>
       )}
