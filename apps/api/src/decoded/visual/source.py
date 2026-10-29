@@ -25,6 +25,11 @@ _REFS = re.compile(r"^\s*(references|bibliography|works cited)\s*$", re.IGNORECA
 _APPENDIX = re.compile(r"^\s*(appendix|appendices|supplementary material)\b", re.IGNORECASE | re.MULTILINE)
 _CAPTION = re.compile(r"^\s*((?:figure|fig\.|table)\s*\d+\s*[.:|])", re.IGNORECASE)
 _HYPHEN_BREAK = re.compile(r"(\w)-\n(\w)")
+# Primeira seção de apêndice sem cabeçalho "Appendix": "A Implementation details"
+_SECTION_A = re.compile(r"^\s*A\.?\s+[A-Z][^\n]{3,80}$", re.MULTILINE)
+
+# O começo do apêndice: é onde os papers põem os exemplos concretos
+APPENDIX_CHARS = 24_000
 # NUL e outros controles que vêm de fontes embutidas; o Postgres recusa NUL
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
@@ -65,20 +70,43 @@ def _cut_tail(text: str) -> str:
     return text[: min(starts)] if starts else text
 
 
-def extract(pdf_bytes: bytes) -> SourceText:
-    started = time.perf_counter()
+def _pages(pdf_bytes: bytes) -> list[str]:
     doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
     try:
         # Sem sort: a ordem do PDF respeita as colunas; sort=True mistura as duas
-        pages = [page.get_text("text") for page in doc]
+        return [page.get_text("text") for page in doc]
     finally:
         doc.close()
 
+
+def _tidy(text: str) -> str:
+    text = re.sub(r"[ \t]+", " ", text)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def appendix(pdf_bytes: bytes) -> str:
+    """
+    O começo do apêndice, sem as referências: exemplos qualitativos,
+    transcrições, prompts e estudos de caso costumam morar ali. Vazio
+    quando o paper não tem apêndice reconhecível.
+    """
+    raw = _HYPHEN_BREAK.sub(r"\1\2", _CONTROL.sub("", "\n".join(_pages(pdf_bytes))))
+    floor = int(len(raw) * 0.3)
+    start = next((m.start() for m in _APPENDIX.finditer(raw) if m.start() > floor), None)
+    if start is None:
+        refs = next((m for m in _REFS.finditer(raw) if m.start() > floor), None)
+        section_a = _SECTION_A.search(raw, refs.end()) if refs else None
+        start = section_a.start() if section_a else None
+    return _tidy(raw[start:])[:APPENDIX_CHARS] if start is not None else ""
+
+
+def extract(pdf_bytes: bytes) -> SourceText:
+    started = time.perf_counter()
+    pages = _pages(pdf_bytes)
+
     raw = _CONTROL.sub("", "\n".join(pages))
     raw = _HYPHEN_BREAK.sub(r"\1\2", raw)
-    body = _cut_tail(raw)
-    body = re.sub(r"[ \t]+", " ", body)
-    body = re.sub(r"\n{3,}", "\n\n", body).strip()
+    body = _tidy(_cut_tail(raw))
 
     captions = [
         line.strip()[:240]

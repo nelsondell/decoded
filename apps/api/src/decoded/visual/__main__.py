@@ -8,6 +8,12 @@ Linha de comando do decode visual. Rode de apps/api (lê o .env de lá):
     python -m decoded.visual trial 2610.01234         # uma chamada direta, sem gravar
     python -m decoded.visual submit --limit 100       # lote, 50% mais barato
     python -m decoded.visual collect <batch_id> --wait
+
+    Passo a passo do método (depois do decode visual):
+    python -m decoded.visual wt-prepare --limit 130   # PDFs para o apêndice (grátis)
+    python -m decoded.visual wt-estimate --limit 130
+    python -m decoded.visual wt-trial 2610.01234 --save
+    python -m decoded.visual wt-submit --limit 130    # coletado pelo mesmo collect
 """
 
 from __future__ import annotations
@@ -92,6 +98,22 @@ def main() -> None:
 
     s = sub.add_parser("collect"); s.add_argument("batch_id"); s.add_argument("--wait", action="store_true")
 
+    from decoded.visual import walkthrough as wt
+    s = sub.add_parser("wt-prepare"); s.add_argument("--limit", type=int, default=130)
+    s = sub.add_parser("wt-estimate"); s.add_argument("--limit", type=int, default=130)
+    s.add_argument("--model", choices=MODELS, default=wt.DEFAULT_MODEL)
+    s.add_argument("--output-tokens", type=int, default=3000)
+
+    s = sub.add_parser("wt-trial"); s.add_argument("arxiv_id")
+    s.add_argument("--model", choices=MODELS, default=wt.DEFAULT_MODEL)
+    s.add_argument("--effort", default="medium", choices=["low", "medium", "high"])
+    s.add_argument("--save", action="store_true", help="grava no banco se passar na conferência")
+
+    s = sub.add_parser("wt-submit"); s.add_argument("--limit", type=int, default=130)
+    s.add_argument("--model", choices=MODELS, default=wt.DEFAULT_MODEL)
+    s.add_argument("--effort", default="medium", choices=["low", "medium", "high"])
+    s.add_argument("--only", nargs="*", help="arxiv ids específicos")
+
     a = ap.parse_args()
     if a.cmd == "ingest":
         _print(asyncio.run(_ingest(a.days, a.max_results, a.enrich)))
@@ -111,6 +133,16 @@ def main() -> None:
         _print(asyncio.run(run.submit(a.limit, a.model, a.effort, _key(), a.only)))
     elif a.cmd == "collect":
         _print(asyncio.run(run.collect(a.batch_id, _key(), a.wait)))
+    elif a.cmd == "wt-prepare":
+        rows = asyncio.run(wt.candidates(a.limit))
+        _print(asyncio.run(wt.fetch_pdfs([p.arxiv_id for p, _, _ in rows])))
+    elif a.cmd == "wt-estimate":
+        _print(wt.estimate(asyncio.run(wt.candidates(a.limit)), a.model, a.output_tokens))
+    elif a.cmd == "wt-trial":
+        outcome, preview = asyncio.run(wt.trial(a.arxiv_id, a.model, a.effort, _key(), a.save))
+        _print({"outcome": outcome.__dict__, "walkthrough": preview})
+    elif a.cmd == "wt-submit":
+        _print(asyncio.run(wt.submit(a.limit, a.model, a.effort, _key(), a.only)))
 
 
 if __name__ == "__main__":

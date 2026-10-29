@@ -1,9 +1,10 @@
 import { PageSection } from "@/components/page-shell";
-import type { Stat, Step, VisualDecode } from "@/lib/visual-types";
+import type { Stat, Step, VisualDecode, Walkthrough as WalkthroughData } from "@/lib/visual-types";
 
 import { FlowDiagram } from "./flow-diagram";
 import { Glyph } from "./glyphs";
 import type { MemberTeaser } from "./members-gate";
+import { Walkthrough } from "./walkthrough";
 
 /*
   A página do paper no decode visual. Pouca prosa, na ordem em que se
@@ -83,8 +84,11 @@ function Steps({ steps }: { steps: Step[] }) {
   );
 }
 
-/** A parte aberta: a frase, o número e como funciona. */
-export function VisualOpen({ v }: { v: VisualDecode }) {
+/**
+ * A parte aberta: a frase, o número e como funciona. Com passo a passo,
+ * o "como funciona" é o diagrama interativo; sem, os três passos e o fluxo.
+ */
+export function VisualOpen({ v, walkthrough }: { v: VisualDecode; walkthrough?: WalkthroughData }) {
   return (
     <>
       <section id="tldr" className="op-section vz-lead">
@@ -94,10 +98,16 @@ export function VisualOpen({ v }: { v: VisualDecode }) {
         {v.stat && <StatBlock stat={v.stat} />}
       </section>
 
-      <PageSection id="how" label="How it works">
-        <Steps steps={v.steps} />
-        {v.flow && <FlowDiagram flow={v.flow} />}
-      </PageSection>
+      {walkthrough ? (
+        <PageSection id="how" label="How it works" aside={`${walkthrough.stages.length} steps`}>
+          <Walkthrough data={walkthrough} />
+        </PageSection>
+      ) : (
+        <PageSection id="how" label="How it works">
+          <Steps steps={v.steps} />
+          {v.flow && <FlowDiagram flow={v.flow} />}
+        </PageSection>
+      )}
     </>
   );
 }

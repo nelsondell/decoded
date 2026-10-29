@@ -361,6 +361,12 @@ async def collect(batch_id: str, api_key: str, wait: bool) -> dict:
             select(ParsedContent.paper_id, ParsedContent.markdown).where(ParsedContent.paper_id.in_(paper_ids))
         )).all())
 
+    # O mesmo coletor serve aos dois lotes: decode visual e passo a passo
+    storer = store
+    if state.get("kind") == "walkthrough":
+        from decoded.visual import walkthrough
+        storer = walkthrough.store
+
     outcomes: list[Outcome] = []
     async for item in await client.messages.batches.results(batch_id):
         meta = state["papers"].get(item.custom_id)
@@ -368,7 +374,7 @@ async def collect(batch_id: str, api_key: str, wait: bool) -> dict:
             continue
         kind = item.result.type
         if kind == "succeeded":
-            outcomes.append(await store(meta["paper_id"], meta["arxiv_id"], item.result.message,
+            outcomes.append(await storer(meta["paper_id"], meta["arxiv_id"], item.result.message,
                                         model, True, texts.get(meta["paper_id"]) or ""))
         else:
             detail = getattr(getattr(item.result, "error", None), "error", None)

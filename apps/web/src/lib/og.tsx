@@ -43,6 +43,12 @@ export async function ogFonts() {
   ];
 }
 
+/** O D do ícone: Literata mais encorpada, para não sumir em 16px. */
+export async function iconFont() {
+  const data = await googleFont("Literata:opsz,wght@72,500");
+  return data ? [{ name: "Literata", data, weight: 500 as const, style: "normal" as const }] : [];
+}
+
 /** Linha de rótulos em mono, com fio acima — o .op-meta da capa. */
 export function OgMeta({ items }: { items: string[] }) {
   return (

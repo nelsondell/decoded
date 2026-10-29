@@ -6,7 +6,7 @@ export const alt = "Decoded — AI research, explained for humans";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
-/** O cartão da capa: a abertura do Offprint, em escala de cartão. */
+/** O cartão da capa: o título da home, em escala de cartão. */
 export default async function OgImage() {
   return new ImageResponse(
     <div
@@ -34,8 +34,8 @@ export default async function OgImage() {
             letterSpacing: "-0.035em",
           }}
         >
-          <span>One paper,</span>
-          <span>printed alone.</span>
+          <span>AI papers, decoded</span>
+          <span>from the full text.</span>
         </div>
         <div style={{ display: "flex", marginTop: 40 }}>
           <OgMeta items={["every AI paper", "explained for humans", "no phd required"]} />
