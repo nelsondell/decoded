@@ -381,6 +381,9 @@ async def collect(batch_id: str, api_key: str, wait: bool) -> dict:
                 logger.warning("visual.store.retry", arxiv_id=meta["arxiv_id"], attempt=attempt, error=str(e)[:120])
                 await engine.dispose()
                 await asyncio.sleep(3 * (attempt + 1))
+            except Exception as e:  # um paper com problema não para o lote
+                logger.warning("visual.store.failed", arxiv_id=meta["arxiv_id"], error=repr(e)[:200])
+                return Outcome(meta["arxiv_id"], "errored", detail=repr(e)[:300])
         return Outcome(meta["arxiv_id"], "errored", detail="banco indisponível depois de 4 tentativas")
 
     outcomes: list[Outcome] = []

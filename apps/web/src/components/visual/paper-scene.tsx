@@ -69,7 +69,7 @@ const contains = (b: Box, p: Pt) =>
 
 /** Retângulo de uma peça: selo em cima, nome e medidor embaixo. */
 function footprint(actor: SceneActor, p: Pt, metered: boolean): Box {
-  const half = Math.max(actor.label.length * 2.9, metered ? 30 : 20);
+  const half = Math.max(actor.label.length * 3.2 + 4, metered ? 32 : 24);
   return {
     x0: p.x - half,
     y0: p.y - 28,
@@ -86,14 +86,36 @@ function pathPoints(beat: SceneBeat): Pt[] {
     .map(([c, r]) => at(c, r));
 }
 
-function sample(pts: Pt[]): Pt[] {
+/** Pontos ao longo do traço exatamente como ele é desenhado (reto ou curvo). */
+function sample(pts: Pt[], smooth: boolean): Pt[] {
   const out: Pt[] = [];
   for (let j = 0; j < pts.length - 1; j++) {
-    for (let k = 0; k <= 10; k++) {
-      out.push({
-        x: pts[j].x + ((pts[j + 1].x - pts[j].x) * k) / 10,
-        y: pts[j].y + ((pts[j + 1].y - pts[j].y) * k) / 10,
-      });
+    const p1 = pts[j];
+    const p2 = pts[j + 1];
+    const curved = smooth && pts.length > 2;
+    const p0 = pts[j - 1] ?? p1;
+    const p3 = pts[j + 2] ?? p2;
+    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
+    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
+    for (let k = 0; k <= 12; k++) {
+      const t = k / 12;
+      if (!curved) {
+        out.push({ x: p1.x + (p2.x - p1.x) * t, y: p1.y + (p2.y - p1.y) * t });
+      } else {
+        const u = 1 - t;
+        out.push({
+          x:
+            u * u * u * p1.x +
+            3 * u * u * t * c1.x +
+            3 * u * t * t * c2.x +
+            t * t * t * p2.x,
+          y:
+            u * u * u * p1.y +
+            3 * u * u * t * c1.y +
+            3 * u * t * t * c2.y +
+            t * t * t * p2.y,
+        });
+      }
     }
   }
   return out;
@@ -101,43 +123,57 @@ function sample(pts: Pt[]): Pt[] {
 
 /** Um traço que nasce ou termina na peça é dela: não a empurra. */
 function crosses(box: Box, here: Pt, lines: Line[]): boolean {
-  return lines.some(
-    (l) =>
-      !l.ends.some((e) => Math.hypot(e.x - here.x, e.y - here.y) < 26) &&
-      l.samples.some((s) => contains(box, s)),
-  );
+  return lines.some((l) => {
+    // A ponta que nasce nesta peça pode encostar nela; o resto do traço, não
+    const own = l.ends.filter(
+      (e) => Math.hypot(e.x - here.x, e.y - here.y) < 26,
+    );
+    return l.samples.some(
+      (s) =>
+        contains(box, s) &&
+        !own.some((e) => Math.hypot(e.x - s.x, e.y - s.y) < 34),
+    );
+  });
 }
 
-/** Vagas em espiral ao redor do ponto pedido, em passos de grade. */
-const OFFSETS: [number, number][] = [[0, 0]];
-for (let r = 1; r <= 6; r++) {
-  for (const [dc, dr] of [
-    [4, 0],
-    [-4, 0],
-    [0, 3],
-    [0, -3],
-    [4, 3],
-    [-4, 3],
-    [4, -3],
-    [-4, -3],
-  ]) {
-    OFFSETS.push([dc * r, dr * Math.ceil(r / 2)]);
-  }
-}
+/** Todas as células da grade, como candidatas a vaga. */
+const CELLS: Pt[] = Array.from({ length: COLS * ROWS }, (_, i) =>
+  at(i % COLS, Math.floor(i / COLS)),
+);
 
+/**
+ * A vaga livre mais perto do ponto pedido: dentro do quadro, sem encostar
+ * em outra peça e sem traço atravessando. Testa a grade inteira, então só
+ * falha se o quadro realmente não tiver lugar.
+ */
 function settle(
   want: Pt,
   box: (p: Pt) => Box,
   taken: Box[],
   lines: Line[],
 ): Pt {
-  for (const [dc, dr] of OFFSETS) {
-    const p = { x: want.x + dc * CW, y: want.y + dr * CH };
+  const clear = (p: Pt) => {
     const b = box(p);
-    if (inside(b) && !taken.some((t) => hits(b, t)) && !crosses(b, p, lines))
-      return p;
-  }
-  // Sem vaga perfeita: ao menos dentro do quadro
+    return inside(b) && !taken.some((t) => hits(b, t));
+  };
+  const free = (p: Pt) => clear(p) && !crosses(box(p), p, lines);
+  const nearest = (ok: (p: Pt) => boolean) => {
+    if (ok(want)) return want;
+    let best: Pt | null = null;
+    let bestD = Infinity;
+    for (const c of CELLS) {
+      const d = Math.hypot(c.x - want.x, c.y - want.y);
+      if (d < bestD && ok(c)) {
+        best = c;
+        bestD = d;
+      }
+    }
+    return best;
+  };
+  // Primeiro sem nada em cima; depois aceitando traço por baixo (as peças têm
+  // fundo, o traço some sob elas); peça sobre peça só se não houver lugar
+  const spot = nearest(free) ?? nearest(clear);
+  if (spot) return spot;
   const b = box(want);
   return {
     x: want.x + Math.max(0, 2 - b.x0) - Math.max(0, b.x1 - (W - 2)),
@@ -181,12 +217,17 @@ function layoutScene(scene: Scene): Layout {
   const lines: Line[] = panels.flatMap((panel) =>
     panel.beats
       .filter((b) => b.kind === "path")
-      .map(pathPoints)
-      .filter((pts) => pts.length > 1)
-      .map((pts) => ({
-        samples: sample(pts),
-        ends: [pts[0], pts[pts.length - 1]],
-      })),
+      .flatMap((b) => {
+        const pts = pathPoints(b);
+        return pts.length > 1
+          ? [
+              {
+                samples: sample(pts, b.shape === "smooth"),
+                ends: [pts[0], pts[pts.length - 1]],
+              },
+            ]
+          : [];
+      }),
   );
 
   const start = new Map<string, Pt>();
@@ -223,6 +264,10 @@ function layoutScene(scene: Scene): Layout {
         };
         const first = boxAt(pts[0]);
         const last = boxAt(pts[pts.length - 1]);
+        // Anda pelo traço até sair de vez do retângulo da peça, nas duas pontas
+        while (first && pts.length > 2 && contains(first, pts[1])) pts.shift();
+        while (last && pts.length > 2 && contains(last, pts[pts.length - 2]))
+          pts.pop();
         if (first) pts[0] = trimEnd(pts[0], pts[1], first);
         if (last)
           pts[pts.length - 1] = trimEnd(
@@ -394,12 +439,28 @@ function Frame({
             data-talking={talking ? "" : undefined}
             transform={`translate(${p.x} ${p.y})`}
           >
+            {/* Fundo da cor do quadro atrás do ícone: o traço passa por baixo da peça */}
+            <rect
+              x={-16}
+              y={-24}
+              width={32}
+              height={31}
+              className="vz-sc-label-plate"
+            />
             <g
               transform="translate(-14 -22) scale(1.16)"
               className="vz-sc-icon"
             >
               {sceneIcon(a.icon)}
             </g>
+            {/* Fundo da cor do quadro: um traço que passe por baixo não apaga o nome */}
+            <rect
+              x={-(a.label.length * 3.2 + 4)}
+              y={5}
+              width={a.label.length * 6.4 + 8}
+              height={16}
+              className="vz-sc-label-plate"
+            />
             <text y={17} textAnchor="middle" className="vz-sc-label">
               {a.label}
             </text>
@@ -409,6 +470,13 @@ function Frame({
                 data-tone={fill.beat.tone}
                 transform="translate(-28 24)"
               >
+                <rect
+                  x={-3}
+                  y={-2}
+                  width={62}
+                  height={24}
+                  className="vz-sc-label-plate"
+                />
                 <rect width={56} height={6} className="vz-sc-fill-track" />
                 <rect
                   width={56 * fill.beat.amount * fill.p}
