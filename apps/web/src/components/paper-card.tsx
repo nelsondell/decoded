@@ -5,7 +5,6 @@ import { EVENTS, capture } from "@/lib/analytics";
 import { RelativeTime } from "@/components/relative-time";
 import { Redacted } from "@/components/brand";
 import { Ledger, LedgerNum, LedgerRow, LedgerSkeleton } from "@/components/ledger";
-import { categoryShort } from "@/lib/format";
 
 export type LedgerStat = { value: string; unit: string; label: string };
 
@@ -27,7 +26,6 @@ export function PaperCard({
   stat?: LedgerStat | null;
 }) {
   const finding = stat ?? paper.stat ?? null;
-  const categories = paper.categories ?? [];
 
   return (
     <LedgerRow
@@ -57,15 +55,7 @@ export function PaperCard({
       }
       title={paper.title}
       hook={paper.one_sentence}
-      meta={
-        <>
-          <RelativeTime iso={paper.published_at} className="tnum" />
-          {categories.slice(0, 2).map((c) => (
-            <span key={c}>{categoryShort(c)}</span>
-          ))}
-          {paper.hn_mentions > 0 && <span className="tnum">HN ×{paper.hn_mentions}</span>}
-        </>
-      }
+      meta={<RelativeTime iso={paper.published_at} className="tnum" />}
     />
   );
 }

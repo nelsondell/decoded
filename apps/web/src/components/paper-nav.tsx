@@ -68,11 +68,6 @@ export function PaperNav({ items }: { items: NavItem[] }) {
       <div className="mt-[calc(22*var(--px))] h-px w-full bg-border" aria-hidden="true">
         <div className="h-px bg-accent" style={{ width: `${progress * 100}%` }} />
       </div>
-
-      <p className="op-rail-note">
-        Every layer here is generated from the paper itself. The PDF is one
-        click away.
-      </p>
     </nav>
   );
 }

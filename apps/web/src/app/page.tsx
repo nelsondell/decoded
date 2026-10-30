@@ -13,7 +13,6 @@ import {
 import { api, type PaperCard as Card } from "@/lib/api";
 import { categoryLabel } from "@/lib/format";
 import { rethrowDuringRevalidation } from "@/lib/isr";
-import { issueDate } from "@/lib/offprint";
 import { visualOf } from "@/lib/visual-types";
 import { Icon } from "@/components/icons";
 
@@ -91,10 +90,8 @@ export default async function HomePage() {
     <PageShell className="op-home">
       <Masthead
         title="AI papers, decoded from the full text."
-        lead="Open one for its headline number, how the method works and what it found."
         meta={
           <>
-            <span className="tnum">{issueDate(new Date())}</span>
             {home && <span className="tnum">{home.total.toLocaleString("en-US")} decoded papers</span>}
           </>
         }
@@ -150,9 +147,8 @@ export default async function HomePage() {
         <RailBlock>
           <RailHeading>How it is made</RailHeading>
           <RailNote>
-            Each paper is decoded from its full text, not the abstract. A
-            number that cannot be found in the paper is dropped before it
-            reaches this page.
+            Read from the full text. Every number is checked against the
+            paper.
           </RailNote>
           <Link href="/archive" className="op-link mt-[calc(20*var(--px))]">
             The full archive <Icon name="arrow-right" />

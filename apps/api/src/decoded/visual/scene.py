@@ -470,8 +470,12 @@ async def store(paper_id: int, arxiv_id: str, message, model: str, batch: bool, 
         walk = dict(walk_row.content) if walk_row is not None else None
         if visual is None:
             return run.Outcome(arxiv_id, "invalid", cost, detail="sem decode visual")
-        new_visual, new_walk, copy_warnings = merge_copy(visual, walk, out.copy_, source_text)
-        warnings += copy_warnings
+        if visual.get("copy_original"):
+            # O texto já foi reescrito numa rodada anterior; reescrever de novo só encurta mais
+            new_visual, new_walk = dict(visual), walk
+        else:
+            new_visual, new_walk, copy_warnings = merge_copy(visual, walk, out.copy_, source_text)
+            warnings += copy_warnings
 
         if not dropped:
             await repo.upsert_section(
