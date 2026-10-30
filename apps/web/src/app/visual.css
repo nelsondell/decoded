@@ -683,23 +683,46 @@
 
   /* ---------- Cena antes × depois ---------- */
 
-  .vz-sc-panels {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: calc(20 * var(--px));
+  /* Um quadro só, com abas: no desktop não passa da largura de uma imagem */
+  .vz-sc {
+    max-width: calc(660 * var(--px));
   }
 
-  .vz-sc-panel {
-    margin: 0;
-    padding: calc(14 * var(--px)) calc(16 * var(--px)) calc(16 * var(--px));
+  .vz-sc-tabs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .vz-sc-tab {
+    display: grid;
+    align-content: start;
+    gap: calc(4 * var(--px));
+    padding: calc(12 * var(--px)) calc(16 * var(--px));
+    border: 0;
+    border-top: 3px solid var(--v-200);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color var(--d-fast) var(--expo),
+      border-color var(--d-fast) var(--expo);
+  }
+
+  /* A aba ativa é a parte de cima do quadro */
+  .vz-sc-tab[aria-selected="true"] {
+    border-top-color: var(--ink-2);
     background: var(--v-100);
   }
 
-  .vz-sc-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: calc(4 * var(--px)) calc(12 * var(--px));
+  .vz-sc-tab[data-side="after"][aria-selected="true"] {
+    border-top-color: var(--moss);
+  }
+
+  .vz-sc-tab:focus-visible {
+    outline: 1px solid var(--moss);
+    outline-offset: -4px;
   }
 
   .vz-sc-side {
@@ -711,23 +734,38 @@
     color: var(--ink-3);
   }
 
-  .vz-sc-panel[data-side="after"] .vz-sc-side {
+  .vz-sc-tab[data-side="after"] .vz-sc-side {
     color: var(--moss);
   }
 
   .vz-sc-name {
     font-family: var(--font-display);
-    font-weight: 500;
+    font-weight: 400;
     font-size: calc(17 * var(--px));
+    line-height: 1.3;
+    color: var(--ink-3);
+    transition: color var(--d-fast) var(--expo);
+  }
+
+  .vz-sc-tab:hover .vz-sc-name {
+    color: var(--ink-2);
+  }
+
+  .vz-sc-tab[aria-selected="true"] .vz-sc-name {
+    font-weight: 500;
     color: var(--ink);
+  }
+
+  .vz-sc-panel {
+    margin: 0;
+    padding: calc(6 * var(--px)) calc(16 * var(--px)) calc(18 * var(--px));
+    background: var(--v-100);
   }
 
   .vz-sc-stage {
     display: block;
     width: 100%;
     height: auto;
-    margin-top: calc(10 * var(--px));
-    overflow: visible;
   }
 
   .vz-sc-ground path {
@@ -748,18 +786,28 @@
     fill: var(--v-200);
   }
 
-  .vz-sc-actor {
-    transition: opacity var(--d-base) var(--expo);
+  /* Cada peça é uma ficha: círculo com fundo, ícone no meio, nome embaixo */
+  .vz-sc-token {
+    fill: var(--v-50);
+    stroke: var(--v-200);
+    stroke-width: 1.2;
   }
 
-  .vz-sc-actor[data-dim] {
-    opacity: 0.28;
+  .vz-sc-token[data-mark="ok"],
+  .vz-sc-token[data-mark="fast"] {
+    stroke: var(--moss);
+    stroke-width: 1.8;
+  }
+
+  .vz-sc-token[data-mark="fail"] {
+    stroke: var(--destructive);
+    stroke-width: 1.8;
   }
 
   .vz-sc-icon {
     fill: none;
     stroke: var(--ink);
-    stroke-width: 1.4;
+    stroke-width: 1.7;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
@@ -771,24 +819,20 @@
   .vz-sc-label {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: 10.5px;
+    font-size: 11.5px;
     fill: var(--ink-2);
-    paint-order: stroke;
-    stroke: var(--v-100);
-    stroke-width: 3px;
-    stroke-linejoin: round;
   }
 
-  /* Quem está falando na faixa de cima ganha o nome em tinta */
+  /* Quem está falando na legenda ganha o nome em tinta */
   .vz-sc-actor[data-talking] .vz-sc-label {
     fill: var(--ink);
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .vz-sc-path {
     fill: none;
     stroke: var(--ink-3);
-    stroke-width: 2;
+    stroke-width: 2.2;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-dasharray: 1;
@@ -800,6 +844,18 @@
 
   .vz-sc-path[data-tone="bad"] {
     stroke: var(--destructive);
+  }
+
+  .vz-sc-arrow {
+    fill: var(--ink-3);
+  }
+
+  .vz-sc-arrow[data-tone="good"] {
+    fill: var(--moss);
+  }
+
+  .vz-sc-arrow[data-tone="bad"] {
+    fill: var(--destructive);
   }
 
   .vz-sc-fill-track {
@@ -821,8 +877,8 @@
   .vz-sc-fill-label {
     font-family: var(--font-data);
     font-weight: 400;
-    font-size: 9px;
-    fill: var(--ink-3);
+    font-size: 9.5px;
+    fill: var(--ink-2);
   }
 
   .vz-sc-mark circle {
@@ -846,43 +902,68 @@
     stroke-linejoin: round;
   }
 
-  .vz-sc-say rect {
-    fill: var(--v-50);
-    stroke: var(--v-200);
-    stroke-width: 1;
+  /* Falas e veredito: todas no mesmo lugar, uma visível, sem a altura pular */
+  .vz-sc-lines,
+  .vz-sc-outcomes {
+    display: grid;
   }
 
-  .vz-sc-say[data-tone="good"] rect {
-    stroke: var(--moss);
+  .vz-sc-line,
+  .vz-sc-outcome {
+    grid-area: 1 / 1;
+    margin: 0;
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity var(--d-base) var(--expo),
+      visibility 0s linear var(--d-base);
   }
 
-  .vz-sc-say[data-tone="bad"] rect {
-    stroke: var(--destructive);
+  .vz-sc-line[data-on],
+  .vz-sc-outcome[data-on] {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
   }
 
-  .vz-sc-say text {
-    font-family: var(--font-data);
+  .vz-sc-lines {
+    margin-top: calc(8 * var(--px));
+  }
+
+  .vz-sc-line {
+    font-family: var(--font-display);
     font-weight: 400;
-    font-size: 9px;
-    fill: var(--ink);
+    font-style: italic;
+    font-size: calc(17 * var(--px));
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  .vz-sc-who {
+    margin-right: calc(8 * var(--px));
+    font-family: var(--font-data);
+    font-style: normal;
+    font-size: var(--t-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .vz-sc-outcomes {
+    margin-top: calc(12 * var(--px));
+    padding-top: calc(12 * var(--px));
+    border-top: 1px solid var(--v-200);
   }
 
   .vz-sc-outcome {
-    margin: calc(10 * var(--px)) 0 0;
     font-family: var(--font-display);
-    font-weight: 400;
-    font-size: calc(16 * var(--px));
-    line-height: 1.45;
-    color: var(--ink-2);
-    opacity: 0;
-    transition: opacity var(--d-base) var(--expo);
+    font-weight: 500;
+    font-size: calc(20 * var(--px));
+    line-height: 1.35;
+    color: var(--ink);
   }
 
-  .vz-sc-outcome[data-shown] {
-    opacity: 1;
-  }
-
-  .vz-sc-panel[data-side="after"] .vz-sc-outcome {
+  .vz-sc-outcome[data-side="after"] {
     color: var(--moss);
   }
 
@@ -894,26 +975,15 @@
 
   .vz-wt {
     display: grid;
-    gap: calc(28 * var(--px));
+    gap: calc(26 * var(--px));
+    max-width: calc(660 * var(--px));
   }
 
   /* O exemplo que atravessa o método: a peça de amostra no topo */
   .vz-wt-example {
     margin: 0;
-    padding: calc(18 * var(--px)) calc(22 * var(--px)) calc(20 * var(--px));
+    padding: calc(16 * var(--px)) calc(20 * var(--px)) calc(18 * var(--px));
     background: var(--v-100);
-  }
-
-  .vz-wt-example-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: calc(6 * var(--px)) calc(18 * var(--px));
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: calc(17 * var(--px));
-    color: var(--ink);
   }
 
   .vz-wt-source {
@@ -930,8 +1000,7 @@
   }
 
   .vz-wt-input {
-    margin: calc(10 * var(--px)) 0 0;
-    max-width: 62ch;
+    margin: calc(8 * var(--px)) 0 0;
     font-family: var(--font-display);
     font-weight: 400;
     font-size: calc(19 * var(--px));
@@ -939,297 +1008,86 @@
     color: var(--ink);
   }
 
-  .vz-wt-body {
+  /* A linha do tempo: número numa bolinha, a linha liga uma etapa à outra */
+  .vz-wt-steps {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: calc(48 * var(--px));
-    align-items: start;
-  }
-
-  .vz-wt-panel {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    min-height: calc(420 * var(--px));
-  }
-
-  .vz-wt-count {
-    font-family: var(--font-data);
-    font-weight: 400;
-    font-size: var(--t-mono);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-  }
-
-  .vz-wt-title {
-    margin: calc(10 * var(--px)) 0 0;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: calc(28 * var(--px));
-    line-height: 1.2;
-    letter-spacing: -0.015em;
-    color: var(--ink);
-  }
-
-  .vz-wt-says {
-    margin: calc(10 * var(--px)) 0 0;
-    max-width: 46ch;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: calc(18 * var(--px));
-    line-height: 1.55;
-    color: var(--ink-2);
-  }
-
-  /* Os blocos que trabalham nesta etapa, com o nome do diagrama */
-  .vz-wt-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: calc(8 * var(--px));
-    margin: calc(16 * var(--px)) 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .vz-wt-chips li {
-    padding: calc(4 * var(--px)) calc(10 * var(--px));
-    border: 1px solid var(--moss);
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: calc(14 * var(--px));
-    color: var(--moss);
-  }
-
-  .vz-wt-ex,
-  .vz-wt-out {
-    margin-top: calc(18 * var(--px));
-    padding: calc(14 * var(--px)) calc(16 * var(--px));
-    background: var(--v-100);
-  }
-
-  .vz-wt-out {
-    background: var(--accent-soft);
-  }
-
-  .vz-wt-ex-label {
-    display: block;
-    font-family: var(--font-data);
-    font-weight: 400;
-    font-size: var(--t-mono);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-  }
-
-  .vz-wt-ex p,
-  .vz-wt-out p {
-    margin: calc(8 * var(--px)) 0 0;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: calc(17 * var(--px));
-    line-height: 1.55;
-    color: var(--ink);
-  }
-
-  .vz-wt-ex[data-format="code"] p,
-  .vz-wt-ex[data-format="numbers"] p {
-    font-family: var(--font-data);
-    font-size: calc(14 * var(--px));
-    line-height: 1.65;
-  }
-
-  .vz-wt-ex[data-format="numbers"] p {
-    color: var(--moss);
-  }
-
-  /* Controles: anterior, a régua de etapas, próximo, play */
-  .vz-wt-controls {
-    display: flex;
-    align-items: center;
-    gap: calc(10 * var(--px));
-    margin-top: auto;
-    padding-top: calc(24 * var(--px));
-  }
-
-  .vz-wt-btn,
-  .vz-wt-play {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    height: calc(40 * var(--px));
-    border: 1px solid var(--v-200);
-    background: transparent;
-    color: var(--ink);
-    cursor: pointer;
-    transition:
-      border-color var(--d-fast) var(--expo),
-      color var(--d-fast) var(--expo);
-  }
-
-  .vz-wt-btn {
-    width: calc(40 * var(--px));
-    font-size: calc(18 * var(--px));
-  }
-
-  .vz-wt-play {
-    padding: 0 calc(14 * var(--px));
-    font-family: var(--font-data);
-    font-weight: 400;
-    font-size: var(--t-mono);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .vz-wt-btn:disabled {
-    color: var(--ink-3);
-    opacity: 0.45;
-    cursor: default;
-  }
-
-  .vz-wt-btn:focus-visible,
-  .vz-wt-play:focus-visible,
-  .vz-wt-tick:focus-visible {
-    outline: 1px solid var(--moss);
-    outline-offset: 3px;
-  }
-
-  .vz-wt-ticks {
-    display: flex;
-    flex: 1;
-    gap: calc(4 * var(--px));
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .vz-wt-ticks li {
-    flex: 1;
+  .vz-wt-step {
+    position: relative;
+    display: grid;
+    grid-template-columns: calc(32 * var(--px)) minmax(0, 1fr);
+    column-gap: calc(16 * var(--px));
+    padding-bottom: calc(24 * var(--px));
   }
 
-  /* Alvo de 24px, traço de 3px no meio */
-  .vz-wt-tick {
-    display: block;
-    width: 100%;
-    height: 24px;
-    padding: 0;
-    border: 0;
-    background: linear-gradient(var(--v-200), var(--v-200)) center / 100% 3px no-repeat;
-    cursor: pointer;
-    transition: background-size var(--d-fast) var(--expo);
+  .vz-wt-step:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: calc(36 * var(--px));
+    bottom: calc(4 * var(--px));
+    left: calc(16 * var(--px) - 0.5px);
+    width: 1px;
+    background: var(--v-200);
   }
 
-  .vz-wt-tick[data-state="done"] {
-    background-image: linear-gradient(var(--accent-light), var(--accent-light));
+  .vz-wt-step:last-child {
+    padding-bottom: 0;
   }
 
-  .vz-wt-tick[data-state="now"] {
-    background-image: linear-gradient(var(--moss), var(--moss));
-    background-size: 100% 5px;
-  }
-
-  /* O diagrama: blocos parados, a etapa acende */
-  .vz-wt-diagram {
-    display: block;
-    width: 100%;
-    max-width: 480px;
-    height: auto;
-    overflow: visible;
-  }
-
-  .vz-wt-node rect {
-    fill: var(--v-50);
-    stroke: var(--v-200);
-    stroke-width: 1;
-    transition:
-      fill var(--d-base) var(--expo),
-      stroke var(--d-base) var(--expo);
-  }
-
-  .vz-wt-node[data-kind="input"] rect,
-  .vz-wt-node[data-kind="output"] rect {
-    stroke-dasharray: 4 3;
-  }
-
-  .vz-wt-node[data-kind="data"] rect {
-    fill: var(--v-100);
-  }
-
-  .vz-wt-node[data-kind="model"] rect {
-    stroke: var(--ink-3);
-  }
-
-  .vz-wt-node text {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 14px;
-    fill: var(--ink-2);
-    transition: fill var(--d-base) var(--expo);
-  }
-
-  .vz-wt-node[data-state="done"] rect {
-    stroke: var(--accent-light);
-  }
-
-  .vz-wt-node[data-state="done"] text {
-    fill: var(--ink);
-  }
-
-  .vz-wt-node[data-state="now"] rect {
-    fill: var(--accent-soft);
-    stroke: var(--moss);
-    stroke-width: 1.5;
-  }
-
-  .vz-wt-node[data-state="now"] text {
-    fill: var(--ink);
-  }
-
-  .vz-wt-edge path {
-    fill: none;
-    stroke: var(--v-200);
-    stroke-width: 1.2;
-    transition: stroke var(--d-base) var(--expo);
-  }
-
-  .vz-wt-edge[data-back] path {
-    stroke-dasharray: 4 3;
-  }
-
-  /* A seta que chega num bloco aceso corre como dado passando */
-  .vz-wt-edge[data-on] path {
-    stroke: var(--moss);
-    stroke-width: 1.5;
-    stroke-dasharray: 6 5;
-    animation: vz-wt-flow 0.9s linear infinite;
-  }
-
-  .vz-wt-edge-label {
+  .vz-wt-num {
+    display: grid;
+    grid-row: span 2;
+    place-items: center;
+    width: calc(32 * var(--px));
+    height: calc(32 * var(--px));
+    border: 1px solid var(--moss);
+    border-radius: 50%;
+    background: var(--v-50);
     font-family: var(--font-data);
     font-weight: 400;
-    font-size: 10.5px;
-    letter-spacing: 0.04em;
-    fill: var(--ink-3);
-    /* Halo da cor do papel: nenhuma linha passa por cima do texto */
-    paint-order: stroke;
-    stroke: var(--v-50);
-    stroke-width: 4px;
-    stroke-linejoin: round;
+    font-size: calc(13 * var(--px));
+    color: var(--moss);
   }
 
-  .vz-wt-edge[data-side]:not([data-on]) .vz-wt-edge-label {
-    display: none;
+  .vz-wt-step[data-out] .vz-wt-num {
+    border-color: var(--moss);
+    background: var(--moss);
+    color: var(--v-50);
   }
 
-  .vz-wt-edge[data-on] .vz-wt-edge-label {
-    fill: var(--moss);
+  .vz-wt-title {
+    margin: 0;
+    padding-top: calc(3 * var(--px));
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: calc(20 * var(--px));
+    line-height: 1.3;
+    color: var(--ink);
   }
 
-  @keyframes vz-wt-flow {
-    to {
-      stroke-dashoffset: -11;
-    }
+  .vz-wt-ex {
+    max-width: 58ch;
+    margin: calc(6 * var(--px)) 0 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: calc(17 * var(--px));
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  .vz-wt-ex[data-format="code"],
+  .vz-wt-ex[data-format="numbers"] {
+    font-family: var(--font-data);
+    font-size: calc(14 * var(--px));
+    line-height: 1.65;
+  }
+
+  .vz-wt-step[data-out] .vz-wt-ex {
+    color: var(--moss);
   }
 
   /* ---------- A trava: o resto do paper para quem tem conta ---------- */
@@ -1361,10 +1219,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .vz-wt-edge[data-on] path {
-      animation: none;
-      stroke-dasharray: none;
-    }
     .vz-node,
     .vz-edge,
     .vz-stat-fill,
@@ -1377,19 +1231,6 @@
   /* ---------- Coluna única ---------- */
 
   @media (max-width: 900px) {
-    .vz-sc-panels {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .vz-wt-body {
-      grid-template-columns: minmax(0, 1fr);
-      gap: calc(28 * var(--px));
-    }
-    .vz-wt-panel {
-      min-height: 0;
-    }
-    .vz-wt-diagram {
-      max-width: 420px;
-    }
     .vz-lead {
       grid-template-columns: minmax(0, 1fr);
       gap: calc(36 * var(--px));
@@ -1429,15 +1270,26 @@
     }
   }
 
-  /* No celular a cena vai de borda a borda: o desenho fica em tamanho real */
+  /* No celular a cena vai de borda a borda: o desenho fica no maior tamanho */
   @media (max-width: 640px) {
-    .vz-sc-panel {
+    .vz-sc {
       margin-inline: calc(var(--pad) * -1);
-      padding: calc(12 * var(--px)) 8px calc(14 * var(--px));
     }
-    .vz-sc-head,
-    .vz-sc-outcome {
-      padding-inline: calc(var(--pad) - 8px);
+    .vz-sc-tab {
+      padding: 10px 12px;
+    }
+    .vz-sc-tab:first-child {
+      padding-left: var(--pad);
+    }
+    .vz-sc-panel {
+      padding: 2px 6px 16px;
+    }
+    .vz-sc-lines,
+    .vz-sc-outcomes {
+      margin-inline: calc(var(--pad) - 6px);
+    }
+    .vz-sc-replay {
+      margin-left: var(--pad);
     }
   }
 }

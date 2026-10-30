@@ -691,24 +691,39 @@
     }
   }
 
-  /* ---------- O livro no celular: coluna de número estreita ---------- */
+  /* ---------- O livro no celular: o número numa linha acima do título ---------- */
 
   @media (max-width: 640px) {
-    .op-ledger {
-      --ledger-num: calc(92 * var(--px));
-      --ledger-gap: calc(18 * var(--px));
+    .op-ledger-head {
+      display: none;
     }
     .op-ledger-link {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: calc(8 * var(--px));
       padding-block: calc(18 * var(--px));
     }
-    .op-ledger-value {
-      font-size: calc(34 * var(--px));
+    .op-ledger-num {
+      flex-direction: row;
+      align-items: baseline;
+      gap: calc(8 * var(--px));
     }
-    .op-ledger-value[data-long] {
-      font-size: calc(25 * var(--px));
-    }
+    .op-ledger-value,
+    .op-ledger-value[data-long],
     .op-ledger-value[data-long="xl"] {
-      font-size: calc(19 * var(--px));
+      flex: none;
+      font-size: calc(28 * var(--px));
+      letter-spacing: -0.02em;
+    }
+    .op-ledger-unit {
+      flex: none;
+      font-size: calc(15 * var(--px));
+    }
+    .op-ledger-label {
+      display: -webkit-box;
+      min-width: 0;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
     }
     .op-ledger-title {
       font-size: calc(21 * var(--px));

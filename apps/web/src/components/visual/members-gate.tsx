@@ -75,16 +75,16 @@ function MemberSections({ arxivId, visual }: { arxivId: string; visual: boolean 
 function Gate({ teaser, anchors }: { teaser: MemberTeaser | null; anchors: string[] }) {
   const items: { glyph: GlyphName; text: string }[] = [
     ...(teaser?.metric
-      ? [{ glyph: "chart" as const, text: `The results chart, after you guess who leads on “${teaser.metric}”` }]
+      ? [{ glyph: "chart" as const, text: `Results: ${teaser.metric}` }]
       : []),
-    ...(teaser?.simTitle ? [{ glyph: "slider" as const, text: `A simulator to try it yourself, “${teaser.simTitle}”` }] : []),
+    ...(teaser?.simTitle ? [{ glyph: "slider" as const, text: `Try it: ${teaser.simTitle}` }] : []),
     ...(teaser && teaser.terms > 0
-      ? [{ glyph: "text" as const, text: `${teaser.terms} ${teaser.terms === 1 ? "term" : "terms"} in plain words` }]
+      ? [{ glyph: "text" as const, text: `${teaser.terms} ${teaser.terms === 1 ? "term" : "terms"} explained` }]
       : []),
     ...(teaser && teaser.limits > 0
-      ? [{ glyph: "warning" as const, text: `${teaser.limits} ${teaser.limits === 1 ? "limit" : "limits"} the paper admits` }]
+      ? [{ glyph: "warning" as const, text: `${teaser.limits} ${teaser.limits === 1 ? "limit" : "limits"}` }]
       : []),
-    { glyph: "model" as const, text: "Explanation modes and the audio version" },
+    { glyph: "model" as const, text: "Audio and other modes" },
   ];
 
   return (
@@ -97,7 +97,7 @@ function Gate({ teaser, anchors }: { teaser: MemberTeaser | null; anchors: strin
         <Redacted width={200} seed={2} />
       </div>
       <h2 id="vz-gate-title" className="vz-gate-title" data-reveal="fade" data-delay="60">
-        {teaser ? "The rest of this paper is open to readers with an account." : "Modes and audio are open to readers with an account."}
+        {teaser ? "The rest is free with an account." : "Audio and modes are free with an account."}
       </h2>
       <ul className="vz-gate-list" data-reveal="fade" data-delay="140">
         {items.map((item) => (

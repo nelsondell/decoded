@@ -87,8 +87,9 @@ function Steps({ steps }: { steps: Step[] }) {
 }
 
 /**
- * A parte aberta: a frase, o número e como funciona. Com passo a passo,
- * o "como funciona" é o diagrama interativo; sem, os três passos e o fluxo.
+ * A parte aberta: a frase, o número, a cena e como funciona. Com passo a
+ * passo, o "como funciona" é a linha do tempo do exemplo; sem, os três
+ * passos e o fluxo.
  */
 export function VisualOpen({
   v,

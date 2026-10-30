@@ -18,8 +18,7 @@ import { Redacted } from "@/components/brand";
 import { Icon } from "@/components/icons";
 import { ApiError, api } from "@/lib/api";
 import { decoded } from "@/lib/decoded-types";
-import { categoryShort, compactNumber } from "@/lib/format";
-import { issueDate, paperFigure, readingMinutes } from "@/lib/offprint";
+import { issueDate, paperFigure } from "@/lib/offprint";
 import { SaveButton } from "@/components/save-button";
 import { PaperJsonLd } from "@/components/paper-json-ld";
 import { SectionTracker } from "@/components/section-tracker";
@@ -134,31 +133,16 @@ export default async function PaperPage({
             authors.length > 0 ? (
               <span className="font-mono text-[length:var(--t-mono)] leading-[1.8] tracking-[0.04em] text-muted-foreground">
                 {authors
-                  .slice(0, 6)
+                  .slice(0, 3)
                   .map((a) => a.name)
                   .join(", ")}
-                {authors.length > 6 && ` +${authors.length - 6}`}
+                {authors.length > 3 && ` +${authors.length - 3}`}
               </span>
             ) : undefined
           }
           meta={
             <>
-              <span>arXiv:{paper.arxiv_id}</span>
-              {(paper.categories ?? []).slice(0, 3).map((c) => (
-                <span key={c}>{categoryShort(c)}</span>
-              ))}
               <span className="tnum">{issueDate(new Date(paper.published_at))}</span>
-              <span className="tnum">{readingMinutes(paper)} min read</span>
-              {paper.citation_count > 0 && (
-                <span className="tnum">{compactNumber(paper.citation_count)} citations</span>
-              )}
-              {paper.hn_url ? (
-                <a href={paper.hn_url} target="_blank" rel="noopener noreferrer" className="op-link tnum">
-                  HN ×{paper.hn_mentions}
-                </a>
-              ) : (
-                paper.hn_mentions > 0 && <span className="tnum">HN ×{paper.hn_mentions}</span>
-              )}
               <a href={paper.pdf_url} target="_blank" rel="noopener noreferrer" className="op-link">
                 PDF <Icon name="arrow-out" />
               </a>
