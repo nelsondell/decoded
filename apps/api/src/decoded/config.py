@@ -61,8 +61,6 @@ class Settings(BaseSettings):
     dspy_generator_model: str = "openai/gpt-5.6-luna"
     dspy_judge_model: str = "openai/gpt-5.6-terra"
 
-    openai_analogy_model: str = "gpt-5.6-luna"
-
     mlflow_tracking_uri: str = "sqlite:///mlflow.db"
     mlflow_experiment_prefix: str = "decoded"
 

@@ -39,7 +39,7 @@ export function MathModeView({ data }: { data: MathMode }) {
                 return (
                   <div
                     key={j}
-                    className="grid gap-1 border-t border-border py-[calc(10*var(--px))] sm:grid-cols-[calc(120*var(--px))_1fr] sm:gap-[calc(24*var(--px))]"
+                    className="grid gap-1 border-t border-border py-[calc(10*var(--px))] sm:grid-cols-[calc(120*var(--px))_1fr] sm:items-baseline sm:gap-[calc(24*var(--px))]"
                   >
                     <dt className="font-mono text-[length:calc(14*var(--px))] font-normal text-accent">
                       {symbol.trim()}

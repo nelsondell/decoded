@@ -80,9 +80,16 @@
     border-bottom-color: var(--v-200);
   }
 
+  /* O avatar não tem texto, então a linha de base dele seria a borda de
+     baixo e ele ficava acima dos links. Um caractere invisível dá à caixa a
+     linha da navegação, e o avatar centra nela. */
   .op-nav-user {
     display: inline-flex;
-    align-self: center;
+    align-items: center;
+  }
+
+  .op-nav-user::before {
+    content: "\200b";
   }
 
   .op-icon {
@@ -157,6 +164,10 @@
     }
     .op-account {
       grid-area: account;
+    }
+    /* Ao lado da marca, o avatar centra na altura dela; "Sign up" segue na linha de base */
+    .op-account:has(.op-nav-user) {
+      align-self: center;
     }
     .op-nav {
       grid-area: nav;

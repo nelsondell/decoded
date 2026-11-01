@@ -20,6 +20,20 @@ class InsufficientCredits(Exception):
     pass
 
 
+def available(user: User) -> tuple[int, datetime | None]:
+    """
+    Saldo e data da próxima reposição como o usuário deve ver agora.
+
+    A reposição semanal só é gravada no próximo gasto; até lá o saldo
+    guardado está velho, e mostrá-lo cru dizia "0" a quem já tinha 3.
+    """
+    if user.plan == "pro" and PRO_UNLIMITED:
+        return user.credits_remaining, None
+    if user.credits_reset_at is None or user.credits_reset_at <= datetime.now(timezone.utc):
+        return FREE_WEEKLY_CREDITS, None
+    return user.credits_remaining, user.credits_reset_at
+
+
 class CreditsRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
