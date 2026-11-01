@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 import structlog
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -7,7 +9,7 @@ from sqlalchemy.orm import selectinload
 from decoded.db.base import async_session_factory
 from decoded.db.models import ModeStatus, Paper
 from decoded.db.repositories.decoded_contents import DecodedContentsRepository
-from decoded.db.repositories.explanation_modes import ExplanationModesRepository
+from decoded.db.repositories.explanation_modes import ExplanationModesRepository, is_stale
 from decoded.decoding.pipeline import _flatten_deep_dive
 from decoded.decoding.prompts import VERSION as DECODE_PROMPT_VERSION
 from decoded.modes.generator import ModeGenerator
@@ -71,7 +73,7 @@ async def generate_mode(
                             "content": existing.content,
                             "cost_usd": 0.0,
                         }
-                    if existing.status == ModeStatus.GENERATING:
+                    if existing.status == ModeStatus.GENERATING and not is_stale(existing):
                         log.info("mode.already_generating")
                         return {"mode": mode, "status": "generating", "cached": False}
                     if existing.status == ModeStatus.NOT_APPLICABLE:
@@ -94,50 +96,56 @@ async def generate_mode(
             if not is_new and not force:
                 return {"mode": mode, "status": "generating", "cached": False}
 
-            # --- Material de origem ---
-            decoded_repo = DecodedContentsRepository(session)
-            sections = await decoded_repo.get_all_sections(
-                paper_id=paper.id, prompt_version=DECODE_PROMPT_VERSION
-            )
+            # Guardado antes: depois de um rollback, ler row.id iria ao banco
+            # fora do contexto async e o erro original se perderia
+            row_id = row.id
 
-            deep_dive_row = sections.get("deep_dive")
-            deep_dive_text = (
-                _flatten_deep_dive(deep_dive_row.content) if deep_dive_row else ""
-            )
-
-            full_text = (
-                paper.parsed_content.markdown
-                if paper.parsed_content and paper.parsed_content.markdown
-                else None
-            )
-
-            if not deep_dive_text and not full_text:
-                await modes_repo.fail(
-                    row.id,
-                    "Sem deep dive nem texto parseado — decodifique o paper primeiro",
-                )
-                await session.commit()
-                return {"mode": mode, "status": "failed", "error": "no_source_material"}
-
-            # --- Geração ---
             try:
+                # --- Material de origem ---
+                decoded_repo = DecodedContentsRepository(session)
+                sections = await decoded_repo.get_all_sections(
+                    paper_id=paper.id, prompt_version=DECODE_PROMPT_VERSION
+                )
+
+                deep_dive_row = sections.get("deep_dive")
+                deep_dive_text = (
+                    _flatten_deep_dive(deep_dive_row.content) if deep_dive_row else ""
+                )
+
+                full_text = (
+                    paper.parsed_content.markdown
+                    if paper.parsed_content and paper.parsed_content.markdown
+                    else None
+                )
+
+                if not deep_dive_text and not full_text:
+                    await modes_repo.fail(
+                        row_id,
+                        "Sem deep dive nem texto parseado — decodifique o paper primeiro",
+                    )
+                    await session.commit()
+                    return {"mode": mode, "status": "failed", "error": "no_source_material"}
+
+                # --- Geração ---
                 async with ModeGenerator(
                     api_key=anthropic_api_key,
                     fast_model=fast_model,
                     deep_model=deep_model,
-                    openai_api_key=settings.openai_api_key,
-                    openai_model=settings.openai_analogy_model,
                 ) as gen:
-                    result = await gen.generate(
-                        mode=mode,
-                        title=paper.title,
-                        abstract=paper.abstract,
-                        deep_dive_text=deep_dive_text,
-                        full_text=full_text,
+                    # Com teto: uma chamada pendurada vira falha e o crédito volta
+                    result = await asyncio.wait_for(
+                        gen.generate(
+                            mode=mode,
+                            title=paper.title,
+                            abstract=paper.abstract,
+                            deep_dive_text=deep_dive_text,
+                            full_text=full_text,
+                        ),
+                        timeout=settings.mode_generation_timeout_s,
                     )
 
                 await modes_repo.complete(
-                    row_id=row.id,
+                    row_id=row_id,
                     content=result.content,
                     model=result.model,
                     input_tokens=result.input_tokens,
@@ -164,7 +172,7 @@ async def generate_mode(
 
             except Exception as e:
                 await session.rollback()
-                await modes_repo.fail(row.id, str(e))
+                await modes_repo.fail(row_id, str(e))
                 await session.commit()
                 log.error("mode.failed", error=str(e))
                 return {"mode": mode, "status": "failed", "error": str(e)}

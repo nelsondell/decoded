@@ -549,6 +549,57 @@
     padding-bottom: calc(14 * var(--px));
   }
 
+  /* Cinco abas curtas: no celular, numa linha só, espalhadas pela largura */
+  @media (max-width: 640px) {
+    .op-tabs[data-fit] {
+      display: grid;
+      grid-auto-flow: column;
+      justify-content: space-between;
+      column-gap: calc(12 * var(--px));
+    }
+  }
+
+  /* Ponto ao lado da aba: pronto (musgo) ou sendo gerado (pulsando). Fica
+     no vão entre as abas, sem mudar a largura de nenhuma. */
+  .op-tabs [role="tab"] {
+    position: relative;
+  }
+
+  .op-tab-mark {
+    position: absolute;
+    top: 0.15em;
+    right: calc(-9 * var(--px));
+    width: calc(5 * var(--px));
+    height: calc(5 * var(--px));
+    border-radius: 50%;
+    background: var(--moss);
+  }
+
+  .op-tab-mark[data-busy] {
+    animation: op-tab-busy 1.2s ease-in-out infinite;
+  }
+
+  @keyframes op-tab-busy {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .op-tab-mark[data-busy] {
+      animation: none;
+    }
+  }
+
+  /* Gerar e o saldo, na mesma linha de base */
+  .op-mode-action {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: calc(12 * var(--px)) calc(24 * var(--px));
+    margin-top: calc(30 * var(--px));
+  }
+
   /* ---------- Busca ---------- */
 
   .op-search {

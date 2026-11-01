@@ -79,16 +79,23 @@ def trace_span(
                 )
             except Exception:
                 pass
-        yield _LangfuseSpan(obs)
     except Exception as e:
         logger.warning("tracing.span_failed", name=name, error=str(e))
+        obs = None
+
+    if obs is None:
         yield _NoOpSpan()
+        return
+
+    # O yield fica fora do except: um erro de quem usa o span sobe intacto,
+    # em vez de virar "generator didn't stop after throw()"
+    try:
+        yield _LangfuseSpan(obs)
     finally:
-        if obs is not None:
-            try:
-                obs.end()
-            except Exception:
-                pass
+        try:
+            obs.end()
+        except Exception:
+            pass
 
 
 def record_generation(

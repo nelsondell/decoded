@@ -15,6 +15,7 @@ from decoded.api.schemas import PaperCard
 from decoded.auth.clerk import get_current_user
 from decoded.db.base import get_session
 from decoded.db.models import DecodedContent, Paper, ReadEvent, SavedPaper, User
+from decoded.db.repositories.credits import available
 from decoded.decoding.prompts import VERSION as PROMPT_VERSION
 
 logger = structlog.get_logger()
@@ -56,13 +57,15 @@ async def get_me(
     )
     saved_count = (await session.execute(count_stmt)).scalar_one()
 
+    credits, reset_at = available(user)
+
     return MeResponse(
         email=user.email,
         display_name=user.display_name,
         avatar_url=user.avatar_url,
         plan=user.plan,
-        credits_remaining=user.credits_remaining,
-        credits_reset_at=user.credits_reset_at,
+        credits_remaining=credits,
+        credits_reset_at=reset_at,
         saved_count=saved_count,
     )
 

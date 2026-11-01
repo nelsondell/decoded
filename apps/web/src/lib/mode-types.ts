@@ -106,5 +106,7 @@ export interface ModesListResponse {
   arxiv_id: string;
   modes: ModeInfo[];
   credits_remaining: number | null;
+  /** Quando volta o lote semanal; só vem se ainda não voltou. */
+  credits_reset_at: string | null;
   plan: string | null;
 }

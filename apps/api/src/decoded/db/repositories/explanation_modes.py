@@ -1,11 +1,25 @@
 from __future__ import annotations
 
-from sqlalchemy import select, update
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from decoded.db.models import ExplanationMode, ModeStatus
 from decoded.modes.schemas import MODE_SCHEMA_VERSION
+
+# Uma geração leva até um minuto. Parada há mais que isto, a máquina caiu
+# no meio (deploy, reinício) e ninguém vai terminar: pode gerar de novo.
+STALE_AFTER = timedelta(minutes=5)
+
+
+def is_stale(row: ExplanationMode) -> bool:
+    """Ficou em "gerando" e ninguém terminou."""
+    return (
+        row.status == ModeStatus.GENERATING
+        and row.updated_at < datetime.now(timezone.utc) - STALE_AFTER
+    )
 
 
 class ExplanationModesRepository:
@@ -53,7 +67,8 @@ class ExplanationModesRepository:
         já está gerando ou o conteúdo já existe — não gere de novo.
 
         Usa ON CONFLICT DO NOTHING para ser atômico: duas requisições
-        simultâneas pro mesmo modo, só uma reserva.
+        simultâneas pro mesmo modo, só uma reserva. Uma linha que falhou, ou
+        que ficou parada em "gerando", volta a ser reservável.
         """
         stmt = (
             insert(ExplanationMode)
@@ -80,6 +95,31 @@ class ExplanationModesRepository:
         existing = await self.get(paper_id, mode, prompt_version)
         if existing is None:
             raise RuntimeError("claim falhou sem linha existente")
+
+        # Retoma o que falhou ou parou; o WHERE garante que só um pedido leva
+        reclaimed = await self.session.execute(
+            update(ExplanationMode)
+            .where(
+                ExplanationMode.id == existing.id,
+                or_(
+                    ExplanationMode.status == ModeStatus.FAILED,
+                    and_(
+                        ExplanationMode.status == ModeStatus.GENERATING,
+                        ExplanationMode.updated_at < func.now() - STALE_AFTER,
+                    ),
+                ),
+            )
+            .values(
+                status=ModeStatus.GENERATING,
+                error=None,
+                requested_by_user_id=user_id,
+                request_count=ExplanationMode.request_count + 1,
+            )
+            .returning(ExplanationMode.id)
+        )
+        if reclaimed.scalar_one_or_none() is not None:
+            await self.session.refresh(existing)
+            return existing, True
 
         # Incrementa o contador de pedidos
         await self.session.execute(

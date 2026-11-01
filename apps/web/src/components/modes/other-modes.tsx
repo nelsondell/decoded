@@ -123,10 +123,8 @@ export function AnalogyModeView({ data }: { data: AnalogyMode }) {
     <div className="flex flex-col gap-[calc(64*var(--px))]">
       {data.analogies.map((a, i) => (
         <div key={i}>
-          <div className="flex flex-wrap items-baseline gap-x-[calc(18*var(--px))] gap-y-1">
-            <h3 className="op-h3">{a.concept}</h3>
-            <span className="op-label">via {a.domain}</span>
-          </div>
+          <h3 className="op-h3">{a.concept}</h3>
+          <p className="op-label m-0 mt-[calc(10*var(--px))]">via {a.domain}</p>
 
           <p className="op-prose mb-0 mt-[calc(16*var(--px))]">{a.setup}</p>
 
@@ -137,13 +135,14 @@ export function AnalogyModeView({ data }: { data: AnalogyMode }) {
                 return (
                   <div
                     key={j}
-                    className="grid gap-1 border-t border-border py-[calc(12*var(--px))] sm:grid-cols-2 sm:gap-[calc(24*var(--px))]"
+                    className="grid gap-1 border-t border-border py-[calc(12*var(--px))] sm:grid-cols-2 sm:items-baseline sm:gap-[calc(24*var(--px))]"
                   >
                     <dt className="font-mono text-[length:calc(14*var(--px))] font-normal text-muted-foreground">
                       {from.trim()}
                     </dt>
-                    <dd className="m-0 text-[length:calc(17*var(--px))]">
-                      <Icon name="arrow-right" className="mr-2 text-accent" />
+                    {/* A seta fica pendurada: a segunda linha alinha com o texto, não com ela */}
+                    <dd className="relative m-0 pl-[1.5em] text-[length:calc(17*var(--px))]">
+                      <Icon name="arrow-right" className="absolute left-0 top-[0.3em] text-accent" />
                       {to.join("→").trim()}
                     </dd>
                   </div>
@@ -169,9 +168,9 @@ export function StoryModeView({ data }: { data: StoryMode }) {
         {data.beats.map((beat, i) => (
           <li
             key={i}
-            className="grid gap-2 sm:grid-cols-[calc(96*var(--px))_1fr] sm:gap-[calc(24*var(--px))]"
+            className="grid gap-2 sm:grid-cols-[calc(96*var(--px))_1fr] sm:items-baseline sm:gap-[calc(24*var(--px))]"
           >
-            <span className="op-label tnum pt-[0.6em]">{beat.year ?? "—"}</span>
+            <span className="op-label tnum">{beat.year ?? "—"}</span>
             <div>
               <h3 className="op-h3">{beat.heading}</h3>
               <p className="op-prose mb-0 mt-[calc(14*var(--px))]">{beat.body}</p>
