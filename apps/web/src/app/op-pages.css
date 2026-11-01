@@ -637,84 +637,6 @@
     color: var(--ink);
   }
 
-  /* ---------- Áudio ---------- */
-
-  .op-play {
-    display: flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 54px;
-    height: 54px;
-    border: 1px solid var(--ink);
-    border-radius: 50%;
-    background: transparent;
-    color: var(--ink);
-    cursor: pointer;
-    transition:
-      color var(--d-fast) var(--expo),
-      border-color var(--d-fast) var(--expo);
-  }
-
-  .op-play:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-
-  .op-track {
-    position: relative;
-    height: 17px;
-    cursor: pointer;
-  }
-
-  .op-track::before {
-    content: "";
-    position: absolute;
-    inset: 8px 0 auto;
-    height: 1px;
-    background: var(--v-200);
-  }
-
-  .op-track-fill {
-    position: absolute;
-    left: 0;
-    top: 8px;
-    height: 1px;
-    background: var(--moss);
-  }
-
-  .op-track-tick {
-    position: absolute;
-    top: 4px;
-    width: 1px;
-    height: 9px;
-    background: var(--ink-3);
-  }
-
-  .op-chapter {
-    display: flex;
-    width: 100%;
-    align-items: baseline;
-    gap: calc(18 * var(--px));
-    padding: calc(14 * var(--px)) 0;
-    border: 0;
-    border-top: 1px solid var(--v-200);
-    background: none;
-    text-align: left;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: calc(18 * var(--px));
-    color: var(--ink);
-    cursor: pointer;
-    transition:
-      color var(--d-fast) var(--expo),
-      transform var(--d-base) var(--expo);
-  }
-
-  .op-chapter[aria-current="true"] {
-    color: var(--moss);
-  }
-
   @media (hover: hover) and (pointer: fine) {
     .op-link:not(:disabled):hover,
     .op-back:hover {
@@ -726,14 +648,6 @@
     }
     .op-ledger-link:hover .op-ledger-title {
       color: var(--moss);
-    }
-    .op-play:not(:disabled):hover {
-      color: var(--moss);
-      border-color: var(--moss);
-    }
-    .op-chapter:hover {
-      color: var(--moss);
-      transform: translateX(14px);
     }
     /* Linha sem destino: sem gesto de link */
     .op-row[data-static]:hover {

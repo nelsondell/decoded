@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Redacted } from "@/components/brand";
 import { ModeSwitcher } from "@/components/modes/mode-switcher";
-import { PodcastSection } from "@/components/podcast/podcast-section";
 import type { PaperDetail } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 import { visualOf, type Glyph as GlyphName } from "@/lib/visual-types";
@@ -66,7 +65,6 @@ function MemberSections({ arxivId, visual }: { arxivId: string; visual: boolean 
         </section>
       )}
       {v && <VisualLocked v={v} />}
-      <PodcastSection arxivId={arxivId} />
       <ModeSwitcher arxivId={arxivId} />
     </>
   );
@@ -84,7 +82,7 @@ function Gate({ teaser, anchors }: { teaser: MemberTeaser | null; anchors: strin
     ...(teaser && teaser.limits > 0
       ? [{ glyph: "warning" as const, text: `${teaser.limits} ${teaser.limits === 1 ? "limit" : "limits"}` }]
       : []),
-    { glyph: "model" as const, text: "Audio and other modes" },
+    { glyph: "model" as const, text: "Explained as math, story, diagram or code" },
   ];
 
   return (
@@ -97,7 +95,7 @@ function Gate({ teaser, anchors }: { teaser: MemberTeaser | null; anchors: strin
         <Redacted width={200} seed={2} />
       </div>
       <h2 id="vz-gate-title" className="vz-gate-title" data-reveal="fade" data-delay="60">
-        {teaser ? "The rest is free with an account." : "Audio and modes are free with an account."}
+        {teaser ? "The rest is free with an account." : "More ways to read this are free with an account."}
       </h2>
       <ul className="vz-gate-list" data-reveal="fade" data-delay="140">
         {items.map((item) => (

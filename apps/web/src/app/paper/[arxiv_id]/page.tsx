@@ -112,7 +112,6 @@ export default async function PaperPage({
     !visual && analogies?.items.length && { id: "analogies", label: "Analogies" },
     !visual && terms.length && { id: "vocabulary", label: "Vocabulary" },
     { id: "modes", label: "Modes" },
-    { id: "podcast", label: "Listen" },
   ].filter(Boolean) as NavItem[];
   const open = new Set(["tldr", "how", "sixty", "deep", "figures", "analogies", "vocabulary"]);
   const gated = navItems.map((n) => n.id).filter((id) => !open.has(id));

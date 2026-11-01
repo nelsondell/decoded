@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
   // Necessário para o proxy do PostHog funcionar
   skipTrailingSlashRedirect: true,
 
+  // O áudio está desligado por enquanto: links antigos voltam para a capa
+  async redirects() {
+    return [{ source: "/listen", destination: "/", permanent: false }];
+  },
+
   async rewrites() {
     return [
       {
@@ -22,10 +27,6 @@ const nextConfig: NextConfig = {
       {
         source: "/ingest/:path*",
         destination: `${POSTHOG_HOST}/:path*`,
-      },
-      {
-        source: "/feed.xml",
-        destination: `${API_URL}/v1/podcasts/feed.xml`,
       },
     ];
   },
