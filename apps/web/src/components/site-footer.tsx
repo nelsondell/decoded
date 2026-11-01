@@ -5,7 +5,6 @@ const LINKS = [
   { href: "/topics", label: "topics" },
   { href: "/authors", label: "authors" },
   { href: "/institutions", label: "institutions" },
-  { href: "/feed.xml", label: "rss", external: true },
   { href: "https://arxiv.org", label: "arxiv", external: true },
 ];
 

@@ -110,9 +110,6 @@ export default async function ArchivePage({
             <Link href="/topics" className="op-link">
               Every topic tracked <Icon name="arrow-right" />
             </Link>
-            <Link href="/listen" className="op-link">
-              Papers as audio <Icon name="arrow-right" />
-            </Link>
           </RailBlock>
 
           <RailNote>
